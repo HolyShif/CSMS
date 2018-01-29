@@ -3,6 +3,7 @@
 
 import RPi.GPIO as GPIO
 import time
+import threading
 import Adafruit_DHT         #for DHT22
 
 GPIO.setmode(GPIO.BOARD)    #board pin numbering, not Broadcom
@@ -48,15 +49,28 @@ temperature = 0
 humidity = 0
 
 #------Function Definitions------
-def get_temp_humid(humidity,temperature)        #function for reading the DHT22
-    humidity, temperature = Adafruit_DHT.read_retry(sensor,temp_humid)
-    #print "Humidity = " + humidity + " ::: Temperature = " + temperature
-    return
+def get_temp_humid(humidity, temperature):      #function for reading the DHT22, to be put in
+												#thread to continuously run without interfering
+	while True:
+    	humidity, temperature = Adafruit_DHT.read_retry(sensor,temp_humid)
+    	#print "Humidity = " + humidity + " ::: Temperature = " + temperature
+    	time.sleep(600)				#repeat every 10 minutes
+
+#1st priority interrupt
+def low_battery(channel):
+	#print "Low Battery Triggered\n"
+	return
+
+#------Interrupt Callback Setup------
+#low battery
+GPIO.add_event_detect(temp_humid, GPIO.RISING, callback=low_battery, bouncetime=300)
 
 
 #main loop
+try:
+	while True:
 
 
-
-
-
+except KeyboardInterrupt:	#exit on ctrl-c
+	GPIO.cleanup()
+GPIO.cleanup()				#normal suceessful exit
