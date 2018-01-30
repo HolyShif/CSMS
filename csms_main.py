@@ -4,26 +4,27 @@
 import RPi.GPIO as GPIO
 import time
 import threading
-import Adafruit_DHT         #for DHT22
+from Adafruit_IO import Client      #adafruit io lib, current using REST not MQTT
+import Adafruit_DHT             #for DHT22
 
-GPIO.setmode(GPIO.BOARD)    #board pin numbering, not Broadcom
+GPIO.setmode(GPIO.BOARD)        #board pin numbering, not Broadcom
 
 #------Pin Definitions------
-oled_rtc_i2c_data = 3       #i2c sda data bus for oled and rtc
-oled_rtc_i2c_clk = 5        #i2c sdc clock bus for oled and rtc
-oled_reset = 7              #reset for oled
-temp_humid = 12             #DHT22 temp/humidity sensor
-main_pow_on = 16            #main power indicator
-low_batt = 18               #low battery indicator
-d_up = 29                   #direction pad up
-d_down = 31                 #direction pad down
-back = 32                   #back button
-d_left = 33                 #direction pad left
-d_right = 35                #direction pad right
-led_pwr = 36                #power indicator led
-select = 37                 #select button
-led_inet = 38               #internet indicator led
-led_temp_stat = 40          #good temperature indicator led
+oled_rtc_i2c_data = 3           #i2c sda data bus for oled and rtc
+oled_rtc_i2c_clk = 5            #i2c sdc clock bus for oled and rtc
+oled_reset = 7                  #reset for oled
+temp_humid = 12                 #DHT22 temp/humidity sensor
+main_pow_on = 16                #main power indicator
+low_batt = 18                   #low battery indicator
+d_up = 29                       #direction pad up
+d_down = 31                     #direction pad down
+back = 32                       #back button
+d_left = 33                     #direction pad left
+d_right = 35                    #direction pad right
+led_pwr = 36                    #power indicator led
+select = 37                     #select button
+led_inet = 38                   #internet indicator led
+led_temp_stat = 40              #good temperature indicator led
 
 #------Pin Setup------
 
@@ -43,10 +44,15 @@ GPIO.setup(select,GPIO.IN)
 GPIO.setup(led_inet,GPIO.OUT)
 GPIO.setup(led_temp_stat,GPIO.OUT)
 
+#------Adafruit IO Setup------
+aio = Client('afe0b443290e43eaa49f6f7b55841bed')        #adafruit io key
+
+
 #------Variables------
 sensor = Adafruit_DHT.DHT22
 temperature = 0
 humidity = 0
+tmp = 0
 
 #------Function Definitions------
 def get_temp_humid(arg1, stop_event):      	#function for reading the DHT22, to be put in
@@ -56,9 +62,9 @@ def get_temp_humid(arg1, stop_event):      	#function for reading the DHT22, to 
                 global humidity
                 #humidity, temperature = Adafruit_DHT.read_retry(sensor,temp_humid)
                 #print "Humidity = " + str(humidity) + " ::: Temperature = " + str(temperature) + "\n"
-                print "world"
-                #stop_event.wait(600)				#repeat every 10 minutes
-                stop_event.wait(1)
+                #print "world"
+                stop_event.wait(600)		#repeat every 10 minutes
+                #stop_event.wait(1)
 
 #1st priority interrupt
 def low_battery(channel):
@@ -80,8 +86,15 @@ t1.start()
 #main loop
 try:
         while True:
-                print "Hello"
-                time.sleep(1)
+                #print "Hello"
+                
+                tmpfeed = "Temperature"
+
+                print "waiting to send\n"
+                aio.send('Temperature', tmp)
+                print "sending " + str(tmp) + " to Adafruit IO on feed " + tmpfeed + "\n"
+                tmp += 1
+                time.sleep(10)
 except KeyboardInterrupt:	#exit on ctrl-c
         GPIO.cleanup()
         t1_stop.set()			#signal for thread to stop
