@@ -54,9 +54,11 @@ def get_temp_humid(arg1, stop_event):      	#function for reading the DHT22, to 
         while(not stop_event.is_set()):
                 global temperature
                 global humidity
-                humidity, temperature = Adafruit_DHT.read_retry(sensor,temp_humid)
+                #humidity, temperature = Adafruit_DHT.read_retry(sensor,temp_humid)
                 #print "Humidity = " + str(humidity) + " ::: Temperature = " + str(temperature) + "\n"
-                stop_event.wait(600)				#repeat every 10 minutes
+                print "world"
+                #stop_event.wait(600)				#repeat every 10 minutes
+                stop_event.wait(1)
 
 #1st priority interrupt
 def low_battery(channel):
@@ -79,8 +81,9 @@ t1.start()
 try:
         while True:
                 print "Hello"
+                time.sleep(1)
 except KeyboardInterrupt:	#exit on ctrl-c
         GPIO.cleanup()
         t1_stop.set()			#signal for thread to stop
 #GPIO.cleanup()				#normal suceessful exit
-#t1_stop.set()				#signal for thread to stop
+t1_stop.set()				#signal for thread to stop
