@@ -94,6 +94,7 @@ try:
                 aio.send('Temperature', tmp)
                 print "sending " + str(tmp) + " to Adafruit IO on feed " + tmpfeed + "\n"
                 tmp += 1
+                aio.send('Alerts', "TEST ALERT")
                 time.sleep(10)
 except KeyboardInterrupt:	#exit on ctrl-c
         GPIO.cleanup()
