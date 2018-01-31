@@ -52,6 +52,8 @@ aio = Client('afe0b443290e43eaa49f6f7b55841bed')        #adafruit io key
 sensor = Adafruit_DHT.DHT22
 temperature = 0
 humidity = 0
+thresh_up = 0		#degrees celsius
+above_thresh = 0
 tmp = 0
 
 #------Function Definitions------
@@ -60,9 +62,24 @@ def get_temp_humid(arg1, stop_event):      	#function for reading the DHT22, to 
         while(not stop_event.is_set()):
                 global temperature
                 global humidity
+				global above_thresh
                 #humidity, temperature = Adafruit_DHT.read_retry(sensor,temp_humid)
                 #print "Humidity = " + str(humidity) + " ::: Temperature = " + str(temperature) + "\n"
                 #print "world"
+
+				#test case
+				temperature = 10
+				if temperature > thresh_up:
+					above_thresh = 1
+					alert_str = "Temperature Is Above " + str(temperature) + " Degrees Celsius\n"
+					aio.send('Alerts', alert_str)
+					print "sent alert to Alerts feed for out of spec temperature\n"
+				else:
+					above_thresh = 0
+
+				aio.send('Temperature', temperature)
+				print "Sent " + str(temprature) + " To Adafruit IO On Feed Temperature\n"
+
                 stop_event.wait(600)		#repeat every 10 minutes
                 #stop_event.wait(1)
 
@@ -87,14 +104,14 @@ t1.start()
 try:
         while True:
                 #print "Hello"
-                
-                tmpfeed = "Temperature"
 
-                print "waiting to send\n"
-                aio.send('Temperature', tmp)
-                print "sending " + str(tmp) + " to Adafruit IO on feed " + tmpfeed + "\n"
-                tmp += 1
-                aio.send('Alerts', "TEST ALERT")
+                #tmpfeed = "Temperature"
+
+                #print "waiting to send\n"
+                #aio.send('Temperature', tmp)
+                #print "sending " + str(tmp) + " to Adafruit IO on feed " + tmpfeed + "\n"
+                #tmp += 1
+                #aio.send('Alerts', "TEST ALERT")
                 time.sleep(10)
 except KeyboardInterrupt:	#exit on ctrl-c
         GPIO.cleanup()
