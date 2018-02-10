@@ -51,7 +51,7 @@ def Main_Menu():
 	draw.text(0,43,text_main_select,1)
 	text_main_input = ' Your Selection : '
 	draw.text(0,50,text_main_input,1)
-	text_main_user = "%
+	
 
 	if: GPIO.event_detected(d_up):
 		Selected_Char += 1
