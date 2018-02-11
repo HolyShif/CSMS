@@ -19,7 +19,7 @@ Selected_Char= 0		#Highlighted character
 Button_Select = 0		#Counter for select
 Button_Back = 0			#Counter for back
 Button_Enter = 0		#Counter for enter
-
+WIFI_PASSWORD = ""              #List for WIFI PASSWORD
 #-------------Port Initialization-----------------------------------
 GPIO.setup(d_up, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  
 GPIO.add_event_detect(d_up, GPIO.FALLING, callback=debounce_callback, bounce_time=300)
@@ -38,21 +38,28 @@ disp.clear()
 disp.display()
 width = disp.width
 height = disp.height
+image = Image.new('1', (width, height))
 font = ImageFont.load_default()
+draw = ImageDraw.Draw(image)
 #---------------Function Declerations---------------------------
 def Main_Menu():
-	Button_Back = 0
-	Button_Enter = 0
-	Button_Select = 0
-
-	text_main = '1)Setup Email        2)Setup Wifi Password3)Enter Wifi SSID    4)Scan For Wifi'
-	draw.text(0,8,text_main,1)
-	text_main_select = ' Select:1234'
-	draw.text(0,43,text_main_select,1)
-	text_main_input = ' Your Selection : '
-	draw.text(0,50,text_main_input,1)
+        draw.rectangle((0,0,width,height), outline=0, fill=0)
+	text_main1 = '1)Setup Email'
+        text_main2 = '2)Setup Wifi Password'
+        text_main3 = '3)Enter Wifi SSID'
+        text_main4 = '4)Scan For Wifi'
+        text_main5 = 'Select:1234'
+	draw.text(0,0,text_main1,1)
+        draw.text(0,7,text_main2,1)
+        draw.text(0,15,text_main3,1)
+        draw.text(0,23,text_main4,1)
+	draw.text(0,39,text_main5,1)
+	text_main_input = 'Your Selection: '
+	draw.text(0,47,text_main_input,1)
 	
-
+        disp.image(image)
+        disp.display()
+        time.sleep(.1)
 	if: GPIO.event_detected(d_up):
 		Selected_Char += 1
 		if: Selected_Char > 3
@@ -77,4 +84,200 @@ def Main_Menu():
 		Button_Back = 0			#Not needed for main menu
 
 	else: GPIO.event_detected(select):
-		Button_Select = 1
+		if: Selected_Char == 0
+                      Selected_Char = 0
+                      Setup_Email()
+
+                else if: Selected_Char == 1
+                      Selected_Char = 0
+                      WIFI_Password()
+                      
+                else if: Selected_Char == 2
+                      Selected_Char = 0
+                      #Call the "Enter the WIFI SSD Function"
+
+                else if: Selected_Char == 3
+                      Selected_Char = 0
+                      #Call the "Scan for WIFI Function"
+
+def WIFI_Password():
+        draw.rectangle((0,0,width,height), outline=0, fill=0)
+
+	text_wifi_pass1 = 'ENTER WIFI PASSWORD'
+        text_wifi_pass2 = 'ABCDEFGHIJKLMNOPQRSTU'
+        text_wifi_pass3 = 'abcdefghijklmnopqrstu'
+        text_wifi_pass4 = 'VWXYZ1234567890_./'
+        text_wifi_pass5 = 'vwxyz!@#$%^&*()\<>'
+        text_wifi_pass6 = 'CURRENT SELECTION:'           
+        
+	draw.text(0,0,text_wifi_pass1,1)
+        draw.text(0,7,text_wifi_pass6,1)
+        draw.text(0,31,text_wifi_pass2,1)
+        draw.text(0,39,text_wifi_pass3,1)
+        draw.text(0,47,text_wifi_pass4,1)
+	draw.text(0,55,text_wifi_pass5,1)
+	
+        disp.image(image)
+        disp.display()
+        time.sleep(.1)
+	if: GPIO.event_detected(d_up):
+                if: Selected_Char < 18
+                        Selected_Char += 60
+
+                else if: Selected_Char < 21 && Selected_Char > 17
+                        Selected_Char += 21
+                      
+		else if: Selected_Char < 42 && Selected_Char > 20
+                        Selected_Char -= 21
+
+                else if: Selected_Char < 78 && Selected_Char > 59
+                        Selected_Char -= 18
+
+                else if: Selected_Char < 60 && Selected_Char > 41
+                        Selected_Char -= 21
+
+
+	else if: GPIO.event_detected(d_down):
+		if: Selected_Char < 21
+                        Selected_Char += 21
+
+                else if: Selected_Char < 39 && Selected_Char > 20
+                        Selected_Char += 21
+
+                else if: Selected_Char > 38 && Selected_Char < 42
+                        Selected_Char -= 21
+
+                else if: Selected_Char < 60 && Selected_Char > 41
+                        Selected_Char += 18
+
+                else if: Selected_Char > 59 && Selected_Char < 78
+                        Selected_Char -= 60
+
+	else if: GPIO.event_detected(d_left):
+		Selected_Char -= 1
+		if: Selected_Char == -1
+                      Selected_Char = 20
+                      
+                else if: Selected_Char == 20
+                        Selected_Char = 41
+
+                else if: Selected_Char == 41
+                      Selected_Char = 59
+
+                else if: Selected_Char == 59
+                      Selected_Char = 77
+                      
+	else if: GPIO.event_detected(d_right):
+		Selected_Char += 1
+		if: Selected_Char == 21
+                      Selected_Char = 0
+                      
+                else if: Selected_Char == 42
+                        Selected_Char = 21
+
+                else if: Selected_Char == 60
+                      Selected_Char = 42
+
+                else if: Selected_Char == 78
+                      Selected_Char = 60
+        
+	else if: GPIO.event_detected(back):
+                #Add Confirmation Menu
+                #Clear Wifi Password
+                Main_Menu()
+
+	else if: GPIO.event_detected(select):
+                #Will add Selected_Character(Selected_Char) to a list
+
+        #Add a check for if the enter button was pressed  this will mean the input is complete
+
+def Setup_Email():
+        draw.rectangle((0,0,width,height), outline=0, fill=0)
+
+	text_email = 'ENTER Email'
+        text_email2 = 'ABCDEFGHIJKLMNOPQRSTU'
+        text_email3 = 'abcdefghijklmnopqrstu'
+        text_email4 = 'VWXYZ1234567890_./'
+        text_email5 = 'vwxyz!@#$%^&*()\<>'
+        text_email6 = 'CURRENT SELECTION:'           
+        
+	draw.text(0,0,text_email,1)
+        draw.text(0,7,text_email6,1)
+        draw.text(0,31,text_email2,1)
+        draw.text(0,39,text_email3,1)
+        draw.text(0,47,text_email4,1)
+	draw.text(0,55,text_email5,1)
+	
+        disp.image(image)
+        disp.display()
+        time.sleep(.1)
+	if: GPIO.event_detected(d_up):
+                if: Selected_Char < 18
+                        Selected_Char += 60
+
+                else if: Selected_Char < 21 && Selected_Char > 17
+                        Selected_Char += 21
+                      
+		else if: Selected_Char < 42 && Selected_Char > 20
+                        Selected_Char -= 21
+
+                else if: Selected_Char < 78 && Selected_Char > 59
+                        Selected_Char -= 18
+
+                else if: Selected_Char < 60 && Selected_Char > 41
+                        Selected_Char -= 21
+
+
+	else if: GPIO.event_detected(d_down):
+		if: Selected_Char < 21
+                        Selected_Char += 21
+
+                else if: Selected_Char < 39 && Selected_Char > 20
+                        Selected_Char += 21
+
+                else if: Selected_Char > 38 && Selected_Char < 42
+                        Selected_Char -= 21
+
+                else if: Selected_Char < 60 && Selected_Char > 41
+                        Selected_Char += 18
+
+                else if: Selected_Char > 59 && Selected_Char < 78
+                        Selected_Char -= 60
+
+	else if: GPIO.event_detected(d_left):
+		Selected_Char -= 1
+		if: Selected_Char == -1
+                      Selected_Char = 20
+                      
+                else if: Selected_Char == 20
+                        Selected_Char = 41
+
+                else if: Selected_Char == 41
+                      Selected_Char = 59
+
+                else if: Selected_Char == 59
+                      Selected_Char = 77
+                      
+	else if: GPIO.event_detected(d_right):
+		Selected_Char += 1
+		if: Selected_Char == 21
+                      Selected_Char = 0
+                      
+                else if: Selected_Char == 42
+                        Selected_Char = 21
+
+                else if: Selected_Char == 60
+                      Selected_Char = 42
+
+                else if: Selected_Char == 78
+                      Selected_Char = 60
+        
+	else if: GPIO.event_detected(back):
+                #Add Confirmation Page
+                #Clear email input
+		Main_Menu()
+
+	else: GPIO.event_detected(select):
+		#Will add Selected_Character(Selected_Char) to a list
+
+        #Add a check for if the enter button was pressed  this will mean the input is complete
