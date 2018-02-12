@@ -279,7 +279,7 @@ def Confirmation_Back_Email():
         text_con_back = 'DO YOU WANT TO'
         text_con_back2 = 'EXIT TO MAIN MENU?'
         text_con_back3 = 'PRESS SELECT TO CONFIRM'
-        text_con_back4 = 'PRESS SELECT TO RETURN'
+        text_con_back4 = 'PRESS BACK TO CANCEL'
 	draw.text((0,0),text_con_back,font=font, fill=255)
 	draw.text((0,7),text_con_back2,font=font, fill=255)
 	draw.text((0,15),text_con_back3,font=font, fill=255)
@@ -303,7 +303,7 @@ def Confirmation_Back_Wifi_Pass():
         text_con_back = 'DO YOU WANT TO'
         text_con_back2 = 'EXIT TO MAIN MENU?'
         text_con_back3 = 'PRESS SELECT TO CONFIRM'
-        text_con_back4 = 'PRESS SELECT TO RETURN'
+        text_con_back4 = 'PRESS BACK TO CANCEL'
 	draw.text((0,0),text_con_back,font=font, fill=255)
 	draw.text((0,7),text_con_back2,font=font, fill=255)
 	draw.text((0,15),text_con_back3,font=font, fill=255)
