@@ -184,7 +184,7 @@ def WIFI_Password():
         
 	else if: GPIO.event_detected(back):
                 #Clear Wifi Password
-                Confirmation_Back()
+                Confirmation_Back_Wifi_Pass()
 
 	else if: GPIO.event_detected(select):
                 #Will add Selected_Character(Selected_Char) to a list
@@ -274,7 +274,7 @@ def Setup_Email():
         
 	else if: GPIO.event_detected(back):
                 #Clear email input
-		Confirmation_Back()
+		Confirmation_Back_Email()
 
 	else: GPIO.event_detected(select):
 		#Will add Selected_Character(Selected_Char) to a list
@@ -302,7 +302,7 @@ def Confirmation_Back_Email():
                 #Clear lists
                 Main_Menu()
 
-        Confirmation_Back()
+        Confirmation_Back_Email()
 
 def Confirmation_Back_Wifi_Pass():
         draw.rectangle((0,0,width,height), outline=0, fill=0)
