@@ -84,10 +84,12 @@ def Main_Menu():
 	else if GPIO.event_detected(select):
 		if Selected_Char == 0:
                       Selected_Char = 0
+                      Email_Info = []
                       Setup_Email()
 
                 else if Selected_Char == 1:
                       Selected_Char = 0
+                      WIFI_PASSWORD = []
                       WIFI_Password()
                       
                 else if Selected_Char == 2:
