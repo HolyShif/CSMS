@@ -7,7 +7,7 @@ disp = Adafruit_SSD1306.SSD1306_128_64(rst=RST)
 Selected_Character  = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U"]
 Selected_Character += ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","i","o","q","r","s","t","u"]
 Selected_Character += ["V","W","X","Y","Z",1,2,3,4,5,6,7,8,9,0,"_",".","/"]
-Selected_Character += ["v","w","x","y","z","!","@","#","$","%","^","&","*","(",")","\","<",">"]
+Selected_Character += ["v","w","x","y","z","!","@","#","$","%","^","&","*","(",")","\\","<",">"]
 
 d_up = 29                       #direction pad up
 d_down = 31                     #direction pad down
