@@ -125,16 +125,16 @@ def WIFI_Password():
                 if: Selected_Char < 18
                         Selected_Char += 60
 
-                else if: Selected_Char < 21 && Selected_Char > 17
+                else if: (Selected_Char < 21) and (Selected_Char > 17)
                         Selected_Char += 21
                       
-		else if: Selected_Char < 42 && Selected_Char > 20
+		else if: (Selected_Char < 42) and (Selected_Char > 20)
                         Selected_Char -= 21
 
-                else if: Selected_Char < 78 && Selected_Char > 59
+                else if: (Selected_Char < 78) and (Selected_Char > 59)
                         Selected_Char -= 18
 
-                else if: Selected_Char < 60 && Selected_Char > 41
+                else if: (Selected_Char < 60) and (Selected_Char > 41)
                         Selected_Char -= 21
 
 
@@ -142,16 +142,16 @@ def WIFI_Password():
 		if: Selected_Char < 21
                         Selected_Char += 21
 
-                else if: Selected_Char < 39 && Selected_Char > 20
+                else if: (Selected_Char < 39) and (Selected_Char > 20)
                         Selected_Char += 21
 
-                else if: Selected_Char > 38 && Selected_Char < 42
+                else if: (Selected_Char > 38) and (Selected_Char < 42)
                         Selected_Char -= 21
 
-                else if: Selected_Char < 60 && Selected_Char > 41
+                else if: (Selected_Char < 60) and (Selected_Char > 41)
                         Selected_Char += 18
 
-                else if: Selected_Char > 59 && Selected_Char < 78
+                else if: (Selected_Char > 59) and (Selected_Char < 78)
                         Selected_Char -= 60
 
 	else if: GPIO.event_detected(d_left):
@@ -215,16 +215,16 @@ def Setup_Email():
                 if: Selected_Char < 18
                         Selected_Char += 60
 
-                else if: Selected_Char < 21 && Selected_Char > 17
+                else if: (Selected_Char < 21) and (Selected_Char > 17)
                         Selected_Char += 21
                       
-		else if: Selected_Char < 42 && Selected_Char > 20
+		else if: (Selected_Char < 42) and (Selected_Char > 20)
                         Selected_Char -= 21
 
-                else if: Selected_Char < 78 && Selected_Char > 59
+                else if: (Selected_Char < 78) and (Selected_Char > 59)
                         Selected_Char -= 18
 
-                else if: Selected_Char < 60 && Selected_Char > 41
+                else if: (Selected_Char < 60) and (Selected_Char > 41)
                         Selected_Char -= 21
 
 
@@ -232,16 +232,16 @@ def Setup_Email():
 		if: Selected_Char < 21
                         Selected_Char += 21
 
-                else if: Selected_Char < 39 && Selected_Char > 20
+                else if: (Selected_Char < 39) and (Selected_Char > 20)
                         Selected_Char += 21
 
-                else if: Selected_Char > 38 && Selected_Char < 42
+                else if: (Selected_Char > 38) and (Selected_Char < 42)
                         Selected_Char -= 21
 
-                else if: Selected_Char < 60 && Selected_Char > 41
+                else if: (Selected_Char < 60) and (Selected_Char > 41)
                         Selected_Char += 18
 
-                else if: Selected_Char > 59 && Selected_Char < 78
+                else if: (Selected_Char > 59) and (Selected_Char < 78)
                         Selected_Char -= 60
 
 	else if: GPIO.event_detected(d_left):
