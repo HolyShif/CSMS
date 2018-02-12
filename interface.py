@@ -60,12 +60,12 @@ def Main_Menu():
         time.sleep(.1)
 	if GPIO.event_detected(d_up):
 		Selected_Char += 1
-		if: Selected_Char > 3
+		if Selected_Char > 3:
 			Selected_Char = 0
 
 	else if GPIO.event_detected(d_down):
 		Selected_Char -= 1
-		if: Selected_char < 0
+		if Selected_char < 0:
 			Selected_Char = 3
 
 	else if GPIO.event_detected(d_left):
