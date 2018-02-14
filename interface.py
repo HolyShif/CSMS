@@ -4,6 +4,7 @@ import Adafruit_SSD1306
 GPIO.setmode(GPIO.BOARD)
 #-----------------Variables---------------------------
 disp = Adafruit_SSD1306.SSD1306_128_64(rst=RST)
+#List of Character for passwords or email input
 Selected_Character  = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U"]
 Selected_Character += ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","i","o","q","r","s","t","u"]
 Selected_Character += ["V","W","X","Y","Z",1,2,3,4,5,6,7,8,9,0,"_",".","/"]
@@ -18,6 +19,7 @@ select =  37                    #select button
 Selected_Char= 0		#Highlighted character
 WIFI_PASSWORD = []              #List for WIFI PASSWORD
 Email_Info = []                 #List for Email Address
+SSID_Info = []                  #List for WIFI SSID
 #-------------Port Initialization-----------------------------------
 GPIO.setup(d_up, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  
 GPIO.add_event_detect(d_up, GPIO.FALLING, callback=debounce_callback, bounce_time=300)
@@ -31,11 +33,12 @@ GPIO.setup(select, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.add_event_detect(select, GPIO.FALLING, callback=debounce_callback, bounce_time=300) 
 GPIO.setup(back, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  
 GPIO.add_event_detect(back, GPIO.FALLING, callback=debounce_callback, bounce_time=300)
+#initialize display
 disp.begin()
 disp.clear()
 disp.display()
-width = disp.width
-height = disp.height
+width = disp.width                      #set width of display
+height = disp.height                    #set height of display
 image = Image.new('1', (width, height))
 font = ImageFont.load_default()
 draw = ImageDraw.Draw(image)
@@ -53,8 +56,7 @@ def Main_Menu():
         draw.text((0,23),text_main4,font=font, fill=255)
 	draw.text((0,39),text_main5 ,font=font, fill=255)
 	text_main_input = 'Your Selection: '
-	draw.text((0,47),text_main_input + Selected_Char,1)
-	
+	draw.text((0,47),text_main_input + Selected_Char,1)	
         disp.image(image)
         disp.display()
         time.sleep(.1)
@@ -78,9 +80,6 @@ def Main_Menu():
 		if Selected_Char > 3:
 			Selected_Char = 0
 
-	else if GPIO.event_detected(back):
-		Button_Back = 0			#Not needed for main menu
-
 	else if GPIO.event_detected(select):
 		if Selected_Char == 0:
                       Selected_Char = 0
@@ -94,12 +93,13 @@ def Main_Menu():
                       
                 else if Selected_Char == 2:
                       Selected_Char = 0
-                      #Call the "Enter the WIFI SSD Function"
+                      SSID_Info = []
+                      Setup_SSID()
 
                 else if Selected_Char == 3:
                       Selected_Char = 0
                       #Call the "Scan for WIFI Function"
-        Main_Menu()
+        Main_Menu()     #Loop to main_menu()
                       
 def WIFI_Password():
         draw.rectangle((0,0,width,height), outline=0, fill=0)
@@ -133,7 +133,6 @@ def WIFI_Password():
 
                 else if (Selected_Char < 60) and (Selected_Char > 41):
                         Selected_Char -= 21
-
 
 	else if GPIO.event_detected(d_down):
 		if Selected_Char < 21:
@@ -180,13 +179,12 @@ def WIFI_Password():
                       Selected_Char = 60
         
 	else if GPIO.event_detected(back):
-                #Clear Wifi Password
-                Confirmation_Back_Wifi_Pass()
+                Confirmation_Back_Wifi_Pass()   #Confirma that you want to return to the main menu
 
 	else if GPIO.event_detected(select):
-                WIFI_PASSWORD += Selected_Character[Selected_Char]
-                
-        WIFI_Password()
+                WIFI_PASSWORD += Selected_Character[Selected_Char]      #Add selected character to wifi password list
+                        
+        WIFI_Password()         #Loop back to Wifi_password()
         #Add a check for if the enter button was pressed  this will mean the input is complete
 
 def Setup_Email():
@@ -202,8 +200,7 @@ def Setup_Email():
         draw.text((0,31),text_email2,font=font, fill=255)
         draw.text((0,39),text_email3,font=font, fill=255)
         draw.text((0,47),text_email4,font=font, fill=255)
-	draw.text((0,55),text_email5,font=font, fill=255)
-	
+	draw.text((0,55),text_email5,font=font, fill=255)	
         disp.image(image)
         disp.display()
         time.sleep(.1)
@@ -269,60 +266,225 @@ def Setup_Email():
                       Selected_Char = 60
         
 	else if GPIO.event_detected(back):
-		Confirmation_Back_Email()
+		Confirmation_Back_Email()       #Confirm that you want to return to the main menu
 
 	else if GPIO.event_detected(select):
-                Email_Info += Selected_Character[Selected_Char] 
-        Setup_Email()
+                Email_Info += Selected_Character[Selected_Char]         #Add the selected character the email address list
+        Setup_Email()           #Loop back to Setup_email()
         #Add a check for if the enter button was pressed  this will mean the input is complete
+
+def Setup_SSID():
+        draw.rectangle((0,0,width,height), outline=0, fill=0)
+	text_SSID1 = 'ENTER WIFI SSID'
+        text_SSID2 = 'ABCDEFGHIJKLMNOPQRSTU'
+        text_SSID3 = 'abcdefghijklmnopqrstu'
+        text_SSID4 = 'VWXYZ1234567890_./'
+        text_SSID5 = 'vwxyz!@#$%^&*()\<>'
+        text_SSID6 = 'CURRENT SELECTION:'                   
+	draw.text((0,0),text_SSID1,font=font, fill=255)
+        draw.text((0,7),text_SSID6 + Selected_Character[Selected_Char],font=font, fill=255)
+        draw.text((0,31),text_SSID2,font=font, fill=255)
+        draw.text((0,39),text_SSID3,font=font, fill=255)
+        draw.text((0,47),text_SSID4,font=font, fill=255)
+	draw.text((0,55),text_SSID5,font=font, fill=255)	
+        disp.image(image)
+        disp.display()
+        time.sleep(.1)
+	if GPIO.event_detected(d_up):
+                if Selected_Char < 18:
+                        Selected_Char += 60
+
+                else if (Selected_Char < 21) and (Selected_Char > 17):
+                        Selected_Char += 21
+                      
+		else if (Selected_Char < 42) and (Selected_Char > 20):
+                        Selected_Char -= 21
+
+                else if (Selected_Char < 78) and (Selected_Char > 59):
+                        Selected_Char -= 18
+
+                else if (Selected_Char < 60) and (Selected_Char > 41):
+                        Selected_Char -= 21
+
+
+	else if GPIO.event_detected(d_down):
+		if Selected_Char < 21
+                        Selected_Char += 21
+
+                else if (Selected_Char < 39) and (Selected_Char > 20):
+                        Selected_Char += 21
+
+                else if (Selected_Char > 38) and (Selected_Char < 42):
+                        Selected_Char -= 21
+
+                else if (Selected_Char < 60) and (Selected_Char > 41):
+                        Selected_Char += 18
+
+                else if (Selected_Char > 59) and (Selected_Char < 78):
+                        Selected_Char -= 60
+
+	else if GPIO.event_detected(d_left):
+		Selected_Char -= 1
+		if Selected_Char == -1:
+                      Selected_Char = 20
+                      
+                else if Selected_Char == 20:
+                        Selected_Char = 41
+
+                else if Selected_Char == 41:
+                      Selected_Char = 59
+
+                else if Selected_Char == 59:
+                      Selected_Char = 77
+                      
+	else if GPIO.event_detected(d_right):
+		Selected_Char += 1
+		if Selected_Char == 21:
+                      Selected_Char = 0
+                      
+                else if Selected_Char == 42:
+                        Selected_Char = 21
+
+                else if Selected_Char == 60:
+                      Selected_Char = 42
+
+                else if Selected_Char == 78:
+                      Selected_Char = 60
+        
+	else if GPIO.event_detected(back):
+		Confirmation_Back_SSID()       #Confirm that you want to return to the main menu
+
+	else if GPIO.event_detected(select):
+                SSID_Info += Selected_Character[Selected_Char]         #Add the selected character the WIFI SSID list
+        Setup_SSID()           #Loop back to Setup_SSID()
+        
+        #Add a check for if the enter button was pressed  this will mean the input is complete
+
+
 
 def Confirmation_Back_Email():
         draw.rectangle((0,0,width,height), outline=0, fill=0)
-        text_con_back = 'DO YOU WANT TO'
         text_con_back2 = 'EXIT TO MAIN MENU?'
         text_con_back3 = 'PRESS SELECT TO CONFIRM'
         text_con_back4 = 'PRESS BACK TO CANCEL'
-	draw.text((0,0),text_con_back,font=font, fill=255)
-	draw.text((0,7),text_con_back2,font=font, fill=255)
-	draw.text((0,15),text_con_back3,font=font, fill=255)
-	draw.text((0,23),text_con_back4,font=font, fill=255)            
+	draw.text((0,0),text_con_back2,font=font, fill=255)
+	draw.text((0,7),text_con_back3,font=font, fill=255)
+	draw.text((0,15),text_con_back4,font=font, fill=255)            
         disp.image(image)
         disp.display()
         time.sleep(.1)
 
         if GPIO.event_detected(back):
-                Setup_Email()
+                Setup_Email()           #Return to Setup_email
 
 	else if GPIO.event_detected(select):
-                Email_Info = []
-                Selected_Char = 0 
-                Main_Menu()
+                Email_Info = []         #Reset Email information
+                Selected_Char = 0       #Reset character counter
+                Main_Menu()             #Return to Main menu
 
-        Confirmation_Back_Email()
+        Confirmation_Back_Email()       #Loops back to the start of Confirmation_Back_Email()
 
 def Confirmation_Back_Wifi_Pass():
         draw.rectangle((0,0,width,height), outline=0, fill=0)
-        text_con_back = 'DO YOU WANT TO'
         text_con_back2 = 'EXIT TO MAIN MENU?'
         text_con_back3 = 'PRESS SELECT TO CONFIRM'
         text_con_back4 = 'PRESS BACK TO CANCEL'
-	draw.text((0,0),text_con_back,font=font, fill=255)
-	draw.text((0,7),text_con_back2,font=font, fill=255)
-	draw.text((0,15),text_con_back3,font=font, fill=255)
-	draw.text((0,23),text_con_back4,font=font, fill=255)            
+	draw.text((0,0),text_con_back2,font=font, fill=255)
+	draw.text((0,7),text_con_back3,font=font, fill=255)
+	draw.text((0,15),text_con_back4,font=font, fill=255)            
         disp.image(image)
         disp.display()
         time.sleep(.1)
 
         if GPIO.event_detected(back):
-                WIFI_Password()
+                WIFI_Password()         #Return to wifi_password
 
 	else if GPIO.event_detected(select):
-                WIFI_PASSWORD = []
-                Selected_Char = 0
-                Main_Menu()
+                WIFI_PASSWORD = []      #Reset wifi password
+                Selected_Char = 0       #Reset character counter
+                Main_Menu()             #Return to main menu
 
-        Confirmation_Back_Wifi_Pass()
+        Confirmation_Back_Wifi_Pass()   #Loops back to start of Confirmation_Back_Wifi_Pass()
 
-        
+def Confirmation_Back_SSID():
+        draw.rectangle((0,0,width,height), outline=0, fill=0)
+        text_con_back2 = 'EXIT TO MAIN MENU?'
+        text_con_back3 = 'PRESS SELECT TO CONFIRM'
+        text_con_back4 = 'PRESS BACK TO CANCEL'
+	draw.text((0,0),text_con_back2,font=font, fill=255)
+	draw.text((0,7),text_con_back3,font=font, fill=255)
+	draw.text((0,15),text_con_back4,font=font, fill=255)            
+        disp.image(image)
+        disp.display()
+        time.sleep(.1)
 
+        if GPIO.event_detected(back):
+                Setup_Email()           #Return to Setup_email
+
+	else if GPIO.event_detected(select):
+                SSID_Info = []          #Reset SSID information
+                Selected_Char = 0       #Reset character counter
+                Main_Menu()             #Return to Main menu
+
+        Confirmation_Back_SSID()       #Loops back to the start of Confirmation_Back_SSID()
+
+def Confirmation_Email():
+        draw.rectangle((0,0,width,height), outline=0, fill=0)
+        text_enter1 = 'IS THIS CORRECT?'
+        text_enter2 = 'PRESS SELECT TO CONFIRM'
+        text_enter3 = 'PRESS BACK TO REENTER'
+        draw.text((0,0),text_enter1,font=font, fill=255)
+        draw.text((0,7),text_enter2,font=font, fill=255)
+        draw.text((0,15),text_enter3,font=font, fill=255)
+        disp.image(image)
+        disp.display()
+        time.sleep(.1)
+
+        if GPIO.event_detected(back):
+                Setup_Email()           #Return to Setup_email
+
+	else if GPIO.event_detected(select):
+                
+
+        Confirmation_Email()       #Loops back to the start of Confirmation_Email()
+
+def Confirmation_Wifi_Pass():
+        draw.rectangle((0,0,width,height), outline=0, fill=0)
+        text_enter1 = 'IS THIS CORRECT?'
+        text_enter2 = 'PRESS SELECT TO CONFIRM'
+        text_enter3 = 'PRESS BACK TO REENTER'
+        draw.text((0,0),text_enter1,font=font, fill=255)
+        draw.text((0,7),text_enter2,font=font, fill=255)
+        draw.text((0,15),text_enter3,font=font, fill=255)
+        disp.image(image)
+        disp.display()
+        time.sleep(.1)
+
+        if GPIO.event_detected(back):
+                WIFI_Password()         #Return to wifi_password
+
+	else if GPIO.event_detected(select):
+
+
+        Confirmation_Wifi_Pass()       #Loops back to the start of Confirmation_Wifi_Pass()   
+
+
+def Confirmation_SSID():
+        draw.rectangle((0,0,width,height), outline=0, fill=0)
+        text_enter1 = 'IS THIS CORRECT?'
+        text_enter2 = 'PRESS SELECT TO CONFIRM'
+        text_enter3 = 'PRESS BACK TO REENTER'
+        draw.text((0,0),text_enter1,font=font, fill=255)
+        draw.text((0,7),text_enter2,font=font, fill=255)
+        draw.text((0,15),text_enter3,font=font, fill=255)
+        disp.image(image)
+        disp.display()
+        time.sleep(.1)
+
+        if GPIO.event_detected(back):
+                Setup_SSID()           #Return to Setup_SSID
+
+	else if GPIO.event_detected(select):
+                
+
+        Confirmation_SSID()       #Loops back to the start of Confirmation_SSSID()
