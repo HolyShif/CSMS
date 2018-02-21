@@ -21,4 +21,8 @@ class TestNetOff(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    log_file = 'test_results/testnet.txt'
+    f = open(log_file, "w")
+    runner = unittest.TextTestRunner(f)
+    unittest.main(testRunner=runner)
+    f.close()

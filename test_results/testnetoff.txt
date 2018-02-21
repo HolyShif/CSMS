@@ -1,0 +1,35 @@
+test_adafruitio (test_net.TestNetOff) ... ok
+test_google (test_net.TestNetOff) ... ok
+test_yahoo (test_net.TestNetOff) ... ok
+test_adafruitio (test_net.TestNetOn) ... FAIL
+test_google (test_net.TestNetOn) ... FAIL
+test_yahoo (test_net.TestNetOn) ... FAIL
+
+======================================================================
+FAIL: test_adafruitio (test_net.TestNetOn)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "test_net.py", line 11, in test_adafruitio
+    self.assertTrue(inet_check.check_connection("www.adafruit.io"))
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_google (test_net.TestNetOn)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "test_net.py", line 7, in test_google
+    self.assertTrue(inet_check.check_connection("www.google.com"))
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_yahoo (test_net.TestNetOn)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "test_net.py", line 9, in test_yahoo
+    self.assertTrue(inet_check.check_connection("www.yahoo.com"))
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.008s
+
+FAILED (failures=3)
