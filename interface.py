@@ -27,7 +27,7 @@ select =  26                    #Select Button
 enter = 22                      #Enter Button
 
 Size_Limit = 0
-MAX_SIZE = 29
+MAX_SIZE = 49
 Selected_Char= 0		#Highlighted character
 WIFI_PASSWORD = []              #List for WIFI PASSWORD
 Adafruit_Info = []              #List for Adafruit Address
@@ -62,7 +62,7 @@ def Main_Menu():
                 if GPIO.input(d_down) == False:
                         time.sleep(.1)
                         Selected_Char += 1
-                        if Selected_Char > 3:
+                        if Selected_Char > 4:
                                 Selected_Char = 0
                         Main_Disp()
                         
@@ -71,20 +71,20 @@ def Main_Menu():
                         time.sleep(.1)
                         Selected_Char -= 1
                         if Selected_Char < 0:
-                                Selected_Char = 3
+                                Selected_Char = 4
                         Main_Disp()
 
                 elif GPIO.input(d_left) == False:
                         time.sleep(.1)
                         Selected_Char -= 1
                         if Selected_Char < 0:
-                                Selected_Char = 3
+                                Selected_Char = 4
                         Main_Disp()
 
                 elif GPIO.input(d_right) == False:
                         time.sleep(.1)
                         Selected_Char += 1
-                        if Selected_Char > 3:
+                        if Selected_Char > 4:
                                 Selected_Char = 0
                         Main_Disp()
 
@@ -116,7 +116,11 @@ def Main_Menu():
 
         elif  Selected_Char == 3:
                 Selected_Char = 0
-                #Call the "Scan for WIFI Function"
+                 #Call the "Scan for WIFI Function"
+        elif Selected_Char == 4:
+                Selected_Char = 0
+                Disp_Inputs()
+               
                       
 def WIFI_Password():
         WIFI_PASS_Disp()
@@ -654,12 +658,14 @@ def Main_Disp():
         text_main2 ='1)SETUP WIFI PASSWORD'
         text_main3 ='2)ENTER WIFI SSID'
         text_main4 ='3)SCAN FOR WIFI'
+        text_main5 ='4)DISPLAY INPUTS'
         text_main_input = 'Your Selection: '
         draw.text((0,0),text_main1,font=font, fill=255)
         draw.text((0,7),text_main2,font=font, fill=255)
         draw.text((0,15),text_main3,font=font, fill=255)
         draw.text((0,23),text_main4,font=font, fill=255)
-        draw.text((0,30),text_main_input + str(Selected_Char), fill=255)	
+        draw.text((0,31),text_main5, font=font,fill=255)
+        draw.text((0,39),text_main_input + str(Selected_Char),font=font, fill=255)
         disp.image(image)
         disp.display()
 
@@ -670,7 +676,9 @@ def WIFI_PASS_Disp():
         text_wifi_pass3 = 'abcdefghijklmnopqrstu'
         text_wifi_pass4 = 'VWXYZ1234567890_./'
         text_wifi_pass5 = 'vwxyz!@#$%^&*()\<>'
-        text_wifi_pass6 = 'CURRENT SELECTION:'                   
+        text_wifi_pass6 = 'CURRENT SELECTION:'
+        text_size = 'SIZE OF INPUT: '
+        draw.text((0,15),text_size + Size_Limit,font=font, fill=255)
         draw.text((0,0),text_wifi_pass1,font=font, fill=255)
         draw.text((0,7),text_wifi_pass6 + Selected_Character[Selected_Char],font=font, fill=255)
         draw.text((0,31),text_wifi_pass2,font=font, fill=255)
@@ -687,7 +695,9 @@ def Set_Ada_Disp():
         text_Adafruit3 = 'abcdefghijklmnopqrstu'
         text_Adafruit4 = 'VWXYZ1234567890_./'
         text_Adafruit5 = 'vwxyz!@#$%^&*()\<>'
-        text_Adafruit6 = 'CURRENT SELECTION:'                   
+        text_Adafruit6 = 'CURRENT SELECTION:'
+        text_size = 'SIZE OF INPUT: '
+        draw.text((0,15),text_size + Size_Limit,font=font, fill=255)
         draw.text((0,0),text_Adafruit,font=font, fill=255)
         draw.text((0,7),text_Adafruit6 + Selected_Character[Selected_Char],font=font, fill=255)
         draw.text((0,31),text_Adafruit2,font=font, fill=255)
@@ -704,7 +714,9 @@ def Set_SSID_Disp():
         text_SSID3 = 'abcdefghijklmnopqrstu'
         text_SSID4 = 'VWXYZ1234567890_./'
         text_SSID5 = 'vwxyz!@#$%^&*()\<>'
-        text_SSID6 = 'CURRENT SELECTION:'                   
+        text_SSID6 = 'CURRENT SELECTION:'
+        text_size = 'SIZE OF INPUT: '
+        draw.text((0,15),text_size + Size_Limit,font=font, fill=255)
         draw.text((0,0),text_SSID1,font=font, fill=255)
         draw.text((0,7),text_SSID6 + Selected_Character[Selected_Char],font=font, fill=255)
         draw.text((0,31),text_SSID2,font=font, fill=255)
@@ -738,5 +750,45 @@ def Size_Disp():
         disp.image(image)
         disp.display()
         time.sleep(5)
-                
+
+def Disp_Inputs():
+        global Adafruit_Info
+        global WIFI_PASSWORD
+        global SSID_Info
+        
+        draw.rectangle((0,0,width,height), outline=0, fill=0)
+        text_in = 'YOUR INPUTS WILL'
+        text_in2 = 'BE DISPLAYED'
+        draw.text((0,0),text_in,font=font, fill=255)
+        draw.text((0,7),text_in2,font=font, fill=255)
+        disp.image(image)
+        disp.display()
+        time.sleep(5)
+        
+        text_ssid = 'YOUR WIFI SSID'
+        text_wifi = 'YOUR WIFI PASSWORD'
+        text_ada = 'YOUR ADAFRUIT KEY'
+
+        draw.rectangle((0,0,width,height), outline=0, fill=0)
+        draw.text((0,0),text_ssid,font=font, fill=255)
+        draw.text((0,7),SSID_Info,font=font, fill=255)
+        disp.image(image)
+        disp.display()
+        time.sleep(5)
+
+        draw.rectangle((0,0,width,height), outline=0, fill=0)
+        draw.text((0,0),text_wifi,font=font, fill=255)
+        draw.text((0,7),WIFI_PASSWORD,font=font, fill=255)
+        disp.image(image)
+        disp.display()
+        time.sleep(5)
+
+        draw.rectangle((0,0,width,height), outline=0, fill=0)
+        draw.text((0,0),text_ada,font=font, fill=255)
+        draw.text((0,7),Adafruit_Info,font=font, fill=255)
+        disp.image(image)
+        disp.display()
+        time.sleep(5)
+        Main_Menu()
+        
 Main_Menu()
