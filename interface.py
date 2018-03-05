@@ -796,8 +796,8 @@ def Scan_Wifi():
         global SSID_Info
         Val = 4
         draw.rectangle((0,0,width,height), outline=0, fill=0)
-        text_enter1 = 'SELECT A WIFI SSID'
-        draw.text((0,0),text_enter1,font=font, fill=255)
+        text_enter1 = 'SELECT A WIFI SSID: '
+        draw.text((0,0),text_enter1 + str(Selected_Char),font=font, fill=255)
         disp.image(image)
         disp.display()
         Bool_Val = True
@@ -808,29 +808,28 @@ def Scan_Wifi():
                         Selected_Char += 1
                         if Selected_Char > Val:
                                 Selected_Char = 0
-                        Main_Disp()
+                        scan_disp()
                         
-
                 elif GPIO.input(d_up) == False:
                         time.sleep(.1)
                         Selected_Char -= 1
                         if Selected_Char < 0:
                                 Selected_Char = Val
-                        Main_Disp()
+                        scan_disp()
 
                 elif GPIO.input(d_left) == False:
                         time.sleep(.1)
                         Selected_Char -= 1
                         if Selected_Char < 0:
                                 Selected_Char = Val
-                        Main_Disp()
+                        scan_disp()
 
                 elif GPIO.input(d_right) == False:
                         time.sleep(.1)
                         Selected_Char += 1
                         if Selected_Char > Val:
                                 Selected_Char = 0
-                        Main_Disp()
+                        scan_disp()
 
                 elif GPIO.input(select) == False:
                         time.sleep(.2)
@@ -850,6 +849,12 @@ def Scan_Wifi():
         time.sleep(4)
         Main_Menu()
         
+def scan_disp():
+        draw.rectangle((0,0,width,height), outline=0, fill=0)
+        text_enter1 = 'SELECT A WIFI SSID: '
+        draw.text((0,0),text_enter1 + str(Selected_Char),font=font, fill=255)
+        disp.image(image)
+        disp.display()
         
 
 def Disp_Inputs():
