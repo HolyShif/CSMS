@@ -25,6 +25,8 @@ d_right = 19                    #Right Button
 select =  26                    #Select Button
 enter = 22                      #Enter Button
 
+essid = []
+Val = 0
 Size_Limit = 0
 MAX_SIZE = 41
 Selected_Char= 0		#Highlighted character
@@ -794,10 +796,29 @@ def Size_Disp():
 def Scan_Wifi():
         global Selected_Char
         global SSID_Info
-        Val = 4
+        global Val
+        global essid
+        
+        p1 = subprocess.Popen(["iwlist","wlan0","scan"],stdout=subprocess.PIPE)
+        p2 = subprocess.Popen(["grep", "-oP", "SSID:\"\K[^\"]+"],stdin=p1.stdout,stdout=subprocess.PIPE)
+
+        p1.stdout.close()
+        out,err = p2.communicate()
+        #print(out)
+        essid = out.splitlines()
+        #print(essid)
+        essid = list(set(essid))
+        #print(essid)
+        #print(len(essid))
+
+        Val = len(essid)
         draw.rectangle((0,0,width,height), outline=0, fill=0)
         text_enter1 = 'SELECT A WIFI SSID: '
         draw.text((0,0),text_enter1 + str(Selected_Char),font=font, fill=255)
+        if len(essid) > 0:
+                draw.text((0,7),essid[0],font=font,fill=255)
+                if len(essid) >1:
+                        draw.text((0,23),essid[1],font=font,fill=255)
         disp.image(image)
         disp.display()
         Bool_Val = True
@@ -840,7 +861,8 @@ def Scan_Wifi():
                         time.sleep(.2)
                         Bool_Val = False
 
-                
+        SSID_Info = essid[Selected_Char]
+              
         draw.rectangle((0,0,width,height), outline=0, fill=0)
         text_con = 'YOUR SELECTION IS'
         draw.text((0,0),text_con,font=font, fill=255)
@@ -850,11 +872,17 @@ def Scan_Wifi():
         Main_Menu()
         
 def scan_disp():
-        draw.rectangle((0,0,width,height), outline=0, fill=0)
-        text_enter1 = 'SELECT A WIFI SSID: '
-        draw.text((0,0),text_enter1 + str(Selected_Char),font=font, fill=255)
-        disp.image(image)
-        disp.display()
+        global essid
+        global Val
+        if Val < 4:
+        
+                draw.rectangle((0,0,width,height), outline=0, fill=0)
+                text_enter1 = 'SELECT A WIFI SSID: '
+                draw.text((0,0),text_enter1 + str(Selected_Char),font=font, fill=255)
+                draw.text((0,7),essid[0],font=font,fill=255)
+                draw.text((0,23),essid[1],font=font,fill=255)
+                disp.image(image)
+                disp.display()
         
 
 def Disp_Inputs():
