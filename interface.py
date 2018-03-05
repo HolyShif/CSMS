@@ -7,7 +7,6 @@ from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 import subprocess
-#GPIO.setmode(GPIO.BOARD)
 #-----------------Variables---------------------------
 RST = None
 disp = Adafruit_SSD1306.SSD1306_128_64(rst=RST, i2c_address=0x3D)
@@ -27,11 +26,11 @@ select =  26                    #Select Button
 enter = 22                      #Enter Button
 
 Size_Limit = 0
-MAX_SIZE = 49
+MAX_SIZE = 41
 Selected_Char= 0		#Highlighted character
-WIFI_PASSWORD = []              #List for WIFI PASSWORD
-Adafruit_Info = []              #List for Adafruit Address
-SSID_Info = []                  #List for WIFI SSID
+WIFI_PASSWORD = ''              #List for WIFI PASSWORD
+Adafruit_Info = ''              #List for Adafruit Address
+SSID_Info = ''                  #List for WIFI SSID
 #-------------Port Initialization-----------------------------------
 GPIO.setup(d_up, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  
 GPIO.setup(d_down, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  
@@ -92,6 +91,7 @@ def Main_Menu():
                         time.sleep(.2)
                         Bool_Val = False
 
+
                 elif GPIO.input(enter) == False:
                         time.sleep(.2)
                         Bool_Val = False
@@ -99,24 +99,25 @@ def Main_Menu():
         if Selected_Char == 0:
                 Selected_Char = 0
                 Size_Limit = 0
-                Adafruit_Info = []
+                Adafruit_Info = ''
                 Setup_Adafruit()
 
         elif Selected_Char == 1:
                 Selected_Char = 0
                 Size_Limit = 0
-                WIFI_PASSWORD = []
+                WIFI_PASSWORD = ''
                 WIFI_Password()
                               
         elif Selected_Char == 2:
                 Size_Limit = 0
                 Selected_Char = 0
-                SSID_Info = []
+                SSID_Info = ''
                 Setup_SSID()
 
         elif  Selected_Char == 3:
                 Selected_Char = 0
-                 #Call the "Scan for WIFI Function"
+                Scan_Wifi()
+                
         elif Selected_Char == 4:
                 Selected_Char = 0
                 Disp_Inputs()
@@ -206,9 +207,9 @@ def WIFI_Password():
                         Bool_Val = False
                         
                 elif GPIO.input(select) == False:
-                        time.sleep(.2)
-                        Size_Limit += Size_Limit
+                        Size_Limit += 1
                         WIFI_PASSWORD += Selected_Character[Selected_Char]      #Add selected character to wifi password list
+                        WIFI_PASS_Disp()
                         
                 elif GPIO.input(enter) == False:
                         time.sleep(.2)
@@ -222,7 +223,7 @@ def WIFI_Password():
                 Confirmation_Wifi_Pass() #Goes to Confirm_Wifi_Pass()
 
         elif Choice == 2:
-                WIFI_PASSWORD = []      #Reset wifi password
+                WIFI_PASSWORD = ''      #Reset wifi password
                 Size_Limit = 0
                 Selected_Char = 0       #Reset character counter
                 Size_Disp()
@@ -310,11 +311,12 @@ def Setup_Adafruit():
                 elif GPIO.input(back) == False:
                         time.sleep(.2)
                         Choice = 0
+                        Bool_Val = False
 
                 elif GPIO.input(select) == False:
-                        time.sleep(.2)
-                        Size_Limit += Size_Limit
+                        Size_Limit += 1
                         Adafruit_Info += Selected_Character[Selected_Char]         #Add the selected character the Adafruit address list
+                        Set_Ada_Disp()
 
                 elif GPIO.input(enter) == False:
                         time.sleep(.2)
@@ -327,7 +329,7 @@ def Setup_Adafruit():
                 Confirmation_Adafruit()
 
         elif Choice == 2:
-                Adafruit_Info = []         
+                Adafruit_Info = ''         
                 Selected_Char = 0       #Reset character counter
                 Size_Limit = 0
                 Size_Disp()
@@ -363,6 +365,7 @@ def Setup_SSID():
 
                         elif (Selected_Char < 60) and (Selected_Char > 41):
                                 Selected_Char -= 21
+                        Set_SSID_Disp()                                
 
                 elif GPIO.input(d_down) == False:
                         if Selected_Char < 21:
@@ -379,6 +382,7 @@ def Setup_SSID():
 
                         elif (Selected_Char > 59) and (Selected_Char < 78):
                                 Selected_Char -= 60
+                        Set_SSID_Disp()
 
                 elif GPIO.input(d_left) == False:
                         Selected_Char -= 1
@@ -393,6 +397,7 @@ def Setup_SSID():
 
                         elif Selected_Char == 59:
                                 Selected_Char = 77
+                        Set_SSID_Disp()
                               
                 elif GPIO.input(d_right) == False:
                         Selected_Char += 1
@@ -407,6 +412,7 @@ def Setup_SSID():
 
                         elif Selected_Char == 78:
                                 Selected_Char = 60
+                        Set_SSID_Disp()
                 
                 elif GPIO.input(back) == False:
                         time.sleep(.2)
@@ -419,9 +425,9 @@ def Setup_SSID():
                         Bool_Val = False
 
                 elif GPIO.input(select) == False:
-                        time.sleep(.2)
-                        Size_Limit += Size_Limit
+                        Size_Limit += 1
                         SSID_Info += Selected_Character[Selected_Char]         #Add the selected character the WIFI SSID list
+                        Set_SSID_Disp()  
 
         if Choice == 0:
                 Confirmation_Back_SSID()       #Confirm that you want to return to the main menu
@@ -430,7 +436,7 @@ def Setup_SSID():
                 Confirmation_SSID()
 
         elif Choice == 2:
-                SSID_Info = []          #Reset SSID information
+                SSID_Info = ''          #Reset SSID information
                 Selected_Char = 0       #Reset character counter
                 Size_Limit = 0
                 Size_Disp()
@@ -452,7 +458,7 @@ def Confirmation_Back_Adafruit():
                 elif GPIO.input(select) == False:
                         time.sleep(.2)
                         Choice = 1
-                        Bool_Val = True
+                        Bool_Val = False
                         
                 elif GPIO.input(enter) == False:
                         time.sleep(.2)
@@ -462,7 +468,7 @@ def Confirmation_Back_Adafruit():
                 Setup_Adafruit()           #Return to Setup_Adafruit
 
         elif Choice == 1:
-                Adafruit_Info = []         #Reset Email information
+                Adafruit_Info = ''         #Reset Email information
                 Selected_Char = 0       #Reset character counter
                 Size_Limit = 0
                 Main_Menu()             #Return to Main menu
@@ -495,14 +501,14 @@ def Confirmation_Back_Wifi_Pass():
                 WIFI_Password()         #Return to wifi_password
                 
         elif Choice == 1:
-                WIFI_PASSWORD = []      #Reset wifi password
+                WIFI_PASSWORD = ''      #Reset wifi password
                 Size_Limit = 0
                 Selected_Char = 0       #Reset character counter
                 Main_Menu()             #Return to main menu
 
 def Confirmation_Back_SSID():
         Conf_Back_Disp()
-        global Selected_Char = 0
+        global Selected_Char
         global SSID_Info
         global Size_Limit
         Bool_Val = True
@@ -525,10 +531,10 @@ def Confirmation_Back_SSID():
                         Bool_Val = False
 
         if Choice == 0:
-                Setup_Email()           #Return to Setup_email
+                Setup_SSID()           #Return to Setup_SSID
                 
         elif Choice ==1:
-                SSID_Info = []          #Reset SSID information
+                SSID_Info = ''          #Reset SSID information
                 Selected_Char = 0       #Reset character counter
                 Size_Limit = 0
                 Main_Menu()             #Return to Main menu                
@@ -541,15 +547,27 @@ def Confirmation_Adafruit():
         
         draw.rectangle((0,0,width,height), outline=0, fill=0)
         text_enter1 = 'IS THIS CORRECT?'
-        text_enter2 = 'YES - PRESS SELECT/ENTER'
-        text_enter3 = 'NO  - PRESS BACK'
-        draw.text((0,0),text_enter1,font=font, fill=255)
-        draw.text((0,7),text_enter2,font=font, fill=255)
-        draw.text((0,15),text_enter3,font=font, fill=255)
-        draw.text((0,23),Adafruit_Info,font=font, fill=255)
-        disp.image(image)
-        disp.display()
-   
+        text_enter2 = 'Y PRESS SELECT/ENTER'
+        text_enter3 = 'N PRESS BACK'
+
+        if len(Adafruit_Info) < 22:
+                draw.rectangle((0,0,width,height), outline=0, fill=0)
+                draw.text((0,0),text_enter1,font=font, fill=255)
+                draw.text((0,7),text_enter2,font=font, fill=255)
+                draw.text((0,15),text_enter3,font=font, fill=255)
+                draw.text((0,23),Adafruit_Info,font=font, fill=255)
+                disp.image(image)
+                disp.display()
+        elif len(Adafruit_Info) > 21:
+                draw.rectangle((0,0,width,height), outline=0, fill=0)
+                draw.text((0,0),text_enter1,font=font, fill=255)
+                draw.text((0,7),text_enter2,font=font, fill=255)
+                draw.text((0,15),text_enter3,font=font, fill=255)
+                draw.text((0,23),Adafruit_Info[0:21],font=font, fill=255)
+                draw.text((0,31),Adafruit_Info[21:42],font=font, fill=255)
+                disp.image(image)
+                disp.display()
+             
         while Bool_Val == True:
                 if GPIO.input(back) == False:
                         time.sleep(.2)
@@ -580,14 +598,25 @@ def Confirmation_Wifi_Pass():
         
         draw.rectangle((0,0,width,height), outline=0, fill=0)
         text_enter1 = 'IS THIS CORRECT?'
-        text_enter2 = 'YES - PRESS SELECT/ENTER'
-        text_enter3 = 'NO  - PRESS BACK'
-        draw.text((0,0),text_enter1,font=font, fill=255)
-        draw.text((0,7),text_enter2,font=font, fill=255)
-        draw.text((0,15),text_enter3,font=font, fill=255)
-        draw.text((0,23),WIFI_PASSWORD,font=font, fill=255)
-        disp.image(image)
-        disp.display()      
+        text_enter2 = 'Y PRESS SELECT/ENTER'
+        text_enter3 = 'N PRESS BACK'
+        if len(WIFI_PASSWORD) < 22:
+                draw.rectangle((0,0,width,height), outline=0, fill=0)
+                draw.text((0,0),text_enter1,font=font, fill=255)
+                draw.text((0,7),text_enter2,font=font, fill=255)
+                draw.text((0,15),text_enter3,font=font, fill=255)
+                draw.text((0,23),WIFI_PASSWORD,font=font, fill=255)
+                disp.image(image)
+                disp.display()
+        elif len(WIFI_PASSWORD) > 21:
+                draw.rectangle((0,0,width,height), outline=0, fill=0)
+                draw.text((0,0),text_enter1,font=font, fill=255)
+                draw.text((0,7),text_enter2,font=font, fill=255)
+                draw.text((0,15),text_enter3,font=font, fill=255)
+                draw.text((0,23),WIFI_PASSWORD[0:21],font=font, fill=255)
+                draw.text((0,31),WIFI_PASSWORD[21:42],font=font, fill=255)
+                disp.image(image)
+                disp.display()     
 
         while Bool_Val == True:
                 if GPIO.input(back) == False:
@@ -606,27 +635,38 @@ def Confirmation_Wifi_Pass():
                         Bool_Val = False
                         
         if Choice == 0:
-                WIFI_Passwod()         #Return to wifi_password
+                WIFI_Password()         #Return to wifi_password
         elif Choice == 1:
                 Selected_Char = 0
                 Main_Menu()
 
 def Confirmation_SSID():
-        global Selected_Char = 0
+        global Selected_Char
         global SSID_Info
         Bool_Val = True
         Choice = 0
         
         draw.rectangle((0,0,width,height), outline=0, fill=0)
         text_enter1 = 'IS THIS CORRECT?'
-        text_enter2 = 'YES - PRESS SELECT/ENTER'
-        text_enter3 = 'NO  - PRESS BACK'
-        draw.text((0,0),text_enter1,font=font, fill=255)
-        draw.text((0,7),text_enter2,font=font, fill=255)
-        draw.text((0,15),text_enter3,font=font, fill=255)
-        draw.text((0,23),SSID_Info,font=font, fill=255)
-        disp.image(image)
-        disp.display()
+        text_enter2 = 'Y PRESS SELECT/ENTER'
+        text_enter3 = 'N PRESS BACK'
+        if len(SSID_Info) < 22:
+                draw.rectangle((0,0,width,height), outline=0, fill=0)
+                draw.text((0,0),text_enter1,font=font, fill=255)
+                draw.text((0,7),text_enter2,font=font, fill=255)
+                draw.text((0,15),text_enter3,font=font, fill=255)
+                draw.text((0,23),SSID_Info,font=font, fill=255)
+                disp.image(image)
+                disp.display()
+        elif len(SSID_Info) > 21:
+                draw.rectangle((0,0,width,height), outline=0, fill=0)
+                draw.text((0,0),text_enter1,font=font, fill=255)
+                draw.text((0,7),text_enter2,font=font, fill=255)
+                draw.text((0,15),text_enter3,font=font, fill=255)
+                draw.text((0,23),SSID_Info[0:21],font=font, fill=255)
+                draw.text((0,31),SSID_Info[21:42],font=font, fill=255)
+                disp.image(image)
+                disp.display()  
 
         while Bool_Val == True:
                 if GPIO.input(back) == False:
@@ -678,7 +718,7 @@ def WIFI_PASS_Disp():
         text_wifi_pass5 = 'vwxyz!@#$%^&*()\<>'
         text_wifi_pass6 = 'CURRENT SELECTION:'
         text_size = 'SIZE OF INPUT: '
-        draw.text((0,15),text_size + Size_Limit,font=font, fill=255)
+        draw.text((0,15),text_size + str(Size_Limit),font=font, fill=255)
         draw.text((0,0),text_wifi_pass1,font=font, fill=255)
         draw.text((0,7),text_wifi_pass6 + Selected_Character[Selected_Char],font=font, fill=255)
         draw.text((0,31),text_wifi_pass2,font=font, fill=255)
@@ -697,7 +737,7 @@ def Set_Ada_Disp():
         text_Adafruit5 = 'vwxyz!@#$%^&*()\<>'
         text_Adafruit6 = 'CURRENT SELECTION:'
         text_size = 'SIZE OF INPUT: '
-        draw.text((0,15),text_size + Size_Limit,font=font, fill=255)
+        draw.text((0,15),text_size + str(Size_Limit),font=font, fill=255)
         draw.text((0,0),text_Adafruit,font=font, fill=255)
         draw.text((0,7),text_Adafruit6 + Selected_Character[Selected_Char],font=font, fill=255)
         draw.text((0,31),text_Adafruit2,font=font, fill=255)
@@ -716,7 +756,7 @@ def Set_SSID_Disp():
         text_SSID5 = 'vwxyz!@#$%^&*()\<>'
         text_SSID6 = 'CURRENT SELECTION:'
         text_size = 'SIZE OF INPUT: '
-        draw.text((0,15),text_size + Size_Limit,font=font, fill=255)
+        draw.text((0,15),text_size + str(Size_Limit),font=font, fill=255)
         draw.text((0,0),text_SSID1,font=font, fill=255)
         draw.text((0,7),text_SSID6 + Selected_Character[Selected_Char],font=font, fill=255)
         draw.text((0,31),text_SSID2,font=font, fill=255)
@@ -729,8 +769,8 @@ def Set_SSID_Disp():
 def Conf_Back_Disp():
         draw.rectangle((0,0,width,height), outline=0, fill=0)
         text_con_back2 = 'EXIT TO MAIN MENU?'
-        text_con_back3 = 'YES - PRESS SELECT/ENTER'
-        text_con_back4 = 'NO  - PRESS BACK'
+        text_con_back3 = 'Y PRESS SELECT/ENTER'
+        text_con_back4 = 'N PRESS BACK'
         draw.text((0,0),text_con_back2,font=font, fill=255)
         draw.text((0,7),text_con_back3,font=font, fill=255)
         draw.text((0,15),text_con_back4,font=font, fill=255)            
@@ -751,44 +791,167 @@ def Size_Disp():
         disp.display()
         time.sleep(5)
 
+def Scan_Wifi():
+        global Selected_Char
+        global SSID_Info
+        Val = 4
+        draw.rectangle((0,0,width,height), outline=0, fill=0)
+        text_enter1 = 'SELECT A WIFI SSID'
+        draw.text((0,0),text_enter1,font=font, fill=255)
+        disp.image(image)
+        disp.display()
+        Bool_Val = True
+        
+        while Bool_Val == True:
+                if GPIO.input(d_down) == False:
+                        time.sleep(.1)
+                        Selected_Char += 1
+                        if Selected_Char > Val:
+                                Selected_Char = 0
+                        Main_Disp()
+                        
+
+                elif GPIO.input(d_up) == False:
+                        time.sleep(.1)
+                        Selected_Char -= 1
+                        if Selected_Char < 0:
+                                Selected_Char = Val
+                        Main_Disp()
+
+                elif GPIO.input(d_left) == False:
+                        time.sleep(.1)
+                        Selected_Char -= 1
+                        if Selected_Char < 0:
+                                Selected_Char = Val
+                        Main_Disp()
+
+                elif GPIO.input(d_right) == False:
+                        time.sleep(.1)
+                        Selected_Char += 1
+                        if Selected_Char > Val:
+                                Selected_Char = 0
+                        Main_Disp()
+
+                elif GPIO.input(select) == False:
+                        time.sleep(.2)
+                        Bool_Val = False
+
+
+                elif GPIO.input(enter) == False:
+                        time.sleep(.2)
+                        Bool_Val = False
+
+                
+        draw.rectangle((0,0,width,height), outline=0, fill=0)
+        text_con = 'YOUR SELECTION IS'
+        draw.text((0,0),text_con,font=font, fill=255)
+        disp.image(image)
+        disp.display()
+        time.sleep(4)
+        Main_Menu()
+        
+        
+
 def Disp_Inputs():
         global Adafruit_Info
         global WIFI_PASSWORD
         global SSID_Info
-        
+        Bool_Val = True
         draw.rectangle((0,0,width,height), outline=0, fill=0)
         text_in = 'YOUR INPUTS WILL'
         text_in2 = 'BE DISPLAYED'
+        text_in3 = 'PRESS SELECT/ENTER'
+        text_in4 = 'TO GO TO NEXT SCREEN'
         draw.text((0,0),text_in,font=font, fill=255)
         draw.text((0,7),text_in2,font=font, fill=255)
+        draw.text((0,15),text_in3,font=font, fill=255)
+        draw.text((0,23),text_in4,font=font, fill=255)
         disp.image(image)
         disp.display()
-        time.sleep(5)
+        while Bool_Val == True:
+                if GPIO.input(select) == False:
+                        time.sleep(.2)
+                        Bool_Val = False
+                        
+                elif GPIO.input(enter) == False:
+                        time.sleep(.2)
+                        Bool_Val = False
+        Bool_Val = True
         
         text_ssid = 'YOUR WIFI SSID'
         text_wifi = 'YOUR WIFI PASSWORD'
         text_ada = 'YOUR ADAFRUIT KEY'
 
-        draw.rectangle((0,0,width,height), outline=0, fill=0)
-        draw.text((0,0),text_ssid,font=font, fill=255)
-        draw.text((0,7),SSID_Info,font=font, fill=255)
-        disp.image(image)
-        disp.display()
-        time.sleep(5)
+        if len(SSID_Info) < 21:
+                draw.rectangle((0,0,width,height), outline=0, fill=0)
+                draw.text((0,0),text_ssid,font=font, fill=255)
+                draw.text((0,7),SSID_Info,font=font, fill=255)
+                disp.image(image)
+                disp.display()
+        elif len(SSID_Info) > 21:
+                draw.rectangle((0,0,width,height), outline=0, fill=0)
+                draw.text((0,0),text_ssid,font=font, fill=255)
+                draw.text((0,7),SSID_Info[0:21],font=font, fill=255)
+                draw.text((0,15),SSID_Info[21:42],font=font, fill=255)
+                disp.image(image)
+                disp.display()
 
-        draw.rectangle((0,0,width,height), outline=0, fill=0)
-        draw.text((0,0),text_wifi,font=font, fill=255)
-        draw.text((0,7),WIFI_PASSWORD,font=font, fill=255)
-        disp.image(image)
-        disp.display()
-        time.sleep(5)
+        while Bool_Val == True:
+                if GPIO.input(select) == False:
+                        time.sleep(.2)
+                        Bool_Val = False
+                        
+                elif GPIO.input(enter) == False:
+                        time.sleep(.2)
+                        Bool_Val = False
+        Bool_Val = True
 
-        draw.rectangle((0,0,width,height), outline=0, fill=0)
-        draw.text((0,0),text_ada,font=font, fill=255)
-        draw.text((0,7),Adafruit_Info,font=font, fill=255)
-        disp.image(image)
-        disp.display()
-        time.sleep(5)
+        if len(WIFI_PASSWORD) < 21:
+                draw.rectangle((0,0,width,height), outline=0, fill=0)
+                draw.text((0,0),text_wifi,font=font, fill=255)
+                draw.text((0,7),WIFI_PASSWORD,font=font, fill=255)
+                disp.image(image)
+                disp.display()
+        elif len(WIFI_PASSWORD) > 21:
+                draw.rectangle((0,0,width,height), outline=0, fill=0)
+                draw.text((0,0),text_wifi,font=font, fill=255)
+                draw.text((0,7),WIFI_PASSWORD[0:21],font=font, fill=255)
+                draw.text((0,15),WIFI_PASSWORD[21:42],font=font, fill=255)
+                disp.image(image)
+                disp.display()
+
+        while Bool_Val == True:
+                if GPIO.input(select) == False:
+                        time.sleep(.2)
+                        Bool_Val = False
+                        
+                elif GPIO.input(enter) == False:
+                        time.sleep(.2)
+                        Bool_Val = False
+        Bool_Val = True
+
+        if len(Adafruit_Info) < 21:
+                draw.rectangle((0,0,width,height), outline=0, fill=0)
+                draw.text((0,0),text_ada,font=font, fill=255)
+                draw.text((0,7),Adafruit_Info,font=font, fill=255)
+                disp.image(image)
+                disp.display()
+        elif len(Adafruit_Info) > 21:
+                draw.rectangle((0,0,width,height), outline=0, fill=0)
+                draw.text((0,0),text_ada,font=font, fill=255)
+                draw.text((0,7),Adafruit_Info[0:21],font=font, fill=255)
+                draw.text((0,15),Adafruit_Info[21:42],font=font, fill=255)
+                disp.image(image)
+                disp.display()
+
+        while Bool_Val == True:
+                if GPIO.input(select) == False:
+                        time.sleep(.2)
+                        Bool_Val = False
+                        
+                elif GPIO.input(enter) == False:
+                        time.sleep(.2)
+                        Bool_Val = False
         Main_Menu()
         
 Main_Menu()
