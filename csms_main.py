@@ -4,27 +4,27 @@
 import RPi.GPIO as GPIO
 import time
 import threading
-from Adafruit_IO import Client      #adafruit io lib, current using REST not MQTT
+from Adafruit_IO import Client       #adafruit io lib, current using REST not MQTT
 import Adafruit_DHT             #for DHT22
 
-GPIO.setmode(GPIO.BOARD)        #board pin numbering, not Broadcom
+GPIO.setmode(GPIO.BCM)        #board pin numbering, not Broadcom
 
 #------Pin Definitions------
-oled_rtc_i2c_data = 3           #i2c sda data bus for oled and rtc
-oled_rtc_i2c_clk = 5            #i2c sdc clock bus for oled and rtc
-oled_reset = 7                  #reset for oled
-temp_humid = 12                 #DHT22 temp/humidity sensor
-main_pow_on = 16                #main power indicator
-low_batt = 18                   #low battery indicator
-d_up = 29                       #direction pad up
-d_down = 31                     #direction pad down
-back = 32                       #back button
-d_left = 33                     #direction pad left
-d_right = 35                    #direction pad right
-led_pwr = 36                    #power indicator led
-select = 37                     #select button
-led_inet = 38                   #internet indicator led
-led_temp_stat = 40              #good temperature indicator led
+oled_rtc_i2c_data = 2           #i2c sda data bus for oled and rtc
+oled_rtc_i2c_clk = 3            #i2c sdc clock bus for oled and rtc
+oled_reset = 4                  #reset for oled
+temp_humid = 18                 #DHT22 temp/humidity sensor
+main_pow_on = 23                #main power indicator
+low_batt = 24                   #low battery indicator
+d_up = 5                        #direction pad up
+d_down = 6                      #direction pad down
+back = 12                       #back button
+d_left = 13                     #direction pad left
+d_right = 19                    #direction pad right
+led_pwr = 16                    #power indicator led
+select = 26                     #select button
+led_inet = 20                   #internet indicator led
+led_temp_stat = 21              #good temperature indicator led
 
 #------Pin Setup------
 
@@ -62,26 +62,29 @@ def get_temp_humid(arg1, stop_event):      	#function for reading the DHT22, to 
         while(not stop_event.is_set()):
                 global temperature
                 global humidity
-				global above_thresh
-                #humidity, temperature = Adafruit_DHT.read_retry(sensor,temp_humid)
+                global above_thresh
+                global temp_humid
+                global sensor
+                humidity, temperature = Adafruit_DHT.read_retry(sensor,temp_humid)
                 #print "Humidity = " + str(humidity) + " ::: Temperature = " + str(temperature) + "\n"
+                print temperature
                 #print "world"
 
-				#test case
-				temperature = 10
-				if temperature > thresh_up:
-					above_thresh = 1
-					alert_str = "Temperature Is Above " + str(temperature) + " Degrees Celsius\n"
-					aio.send('Alerts', alert_str)
-					print "sent alert to Alerts feed for out of spec temperature\n"
-				else:
-					above_thresh = 0
+		#test case
+		#temperature = 10
+                if temperature > thresh_up:
+                        above_thresh = 1
+                        alert_str = "Temperature Is Above " + str(temperature) + " Degrees Celsius\n"
+                        aio.send('Alerts', alert_str)
+                        print "sent alert to Alerts feed for out of spec temperature\n"
+                else:
+                        above_thresh = 0
 
-				aio.send('Temperature', temperature)
-				print "Sent " + str(temprature) + " To Adafruit IO On Feed Temperature\n"
+                aio.send('Temperature', temperature)
+                print "Sent " + str(temperature) + " To Adafruit IO On Feed Temperature\n"
 
-                stop_event.wait(600)		#repeat every 10 minutes
-                #stop_event.wait(1)
+                #stop_event.wait(600)		#repeat every 10 minutes
+                stop_event.wait(10)
 
 #1st priority interrupt
 def low_battery(channel):
