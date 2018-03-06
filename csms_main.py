@@ -15,7 +15,7 @@ oled_rtc_i2c_clk = 3            #i2c sdc clock bus for oled and rtc
 oled_reset = 4                  #reset for oled
 temp_humid = 18                 #DHT22 temp/humidity sensor
 main_pow_on = 23                #main power indicator
-low_batt = 24                   #low battery indicator
+low_bat = 17                    #low battery indicator
 d_up = 5                        #direction pad up
 d_down = 6                      #direction pad down
 back = 12                       #back button
@@ -33,7 +33,7 @@ led_temp_stat = 21              #good temperature indicator led
 GPIO.setup(oled_reset,GPIO.OUT)
 GPIO.setup(temp_humid,GPIO.IN)
 GPIO.setup(main_pow_on,GPIO.IN)
-GPIO.setup(low_batt,GPIO.IN)
+GPIO.setup(low_bat,GPIO.IN)
 GPIO.setup(d_up,GPIO.IN)
 GPIO.setup(d_down,GPIO.IN)
 GPIO.setup(back,GPIO.IN)
@@ -50,28 +50,27 @@ aio = Client('afe0b443290e43eaa49f6f7b55841bed')        #adafruit io key
 
 #------Variables------
 sensor = Adafruit_DHT.DHT22
-temperature = 0
-humidity = 0
-thresh_up = 0		#degrees celsius
-above_thresh = 0
-tmp = 0
+#temperature = 0
+#humidity = 0
+#thresh_up = 0		#degrees celsius
+#above_thresh = 0
+#tmp = 0
 
 #------Function Definitions------
 def get_temp_humid(arg1, stop_event):      	#function for reading the DHT22, to be put in
 						#thread to continuously run without interference
+        #aio = Client('afe0b443290e43eaa49f6f7b55841bed')        #adafruit io key
+        #sensor = Adafruit_DHT.DHT22
+        GPIO.setup(temp_humid,GPIO.IN)
+        #temperature = 0
+        #humidity = 0
+        thresh_up = 0		#degrees celsius
+        above_thresh = 0
         while(not stop_event.is_set()):
-                global temperature
-                global humidity
-                global above_thresh
-                global temp_humid
-                global sensor
                 humidity, temperature = Adafruit_DHT.read_retry(sensor,temp_humid)
                 #print "Humidity = " + str(humidity) + " ::: Temperature = " + str(temperature) + "\n"
                 print temperature
-                #print "world"
 
-		#test case
-		#temperature = 10
                 if temperature > thresh_up:
                         above_thresh = 1
                         alert_str = "Temperature Is Above " + str(temperature) + " Degrees Celsius\n"
@@ -88,12 +87,24 @@ def get_temp_humid(arg1, stop_event):      	#function for reading the DHT22, to 
 
 #1st priority interrupt
 def low_battery(channel):
-	#print "Low Battery Triggered\n"
+	print "Low Battery Triggered\n"
 	return
+
+def bat_on(channel):
+        print "Battery Activated"
+        return
+
+def mains_on(channel):
+        print "Main Power Restored"
+        return
 
 #------Interrupt Callback Setup------
 #low battery
-GPIO.add_event_detect(temp_humid, GPIO.RISING, callback=low_battery, bouncetime=300)
+GPIO.add_event_detect(low_bat, GPIO.FALLING, callback=low_battery, bouncetime=300)
+#battery activation
+GPIO.add_event_detect(main_pow_on, GPIO.FALLING, callback=bat_on, bouncetime=300)
+#main power restoration
+#GPIO.add_event_detect(main_pow_on, GPIO.RISING, callback=mains_on, bouncetime=300)
 
 #------Thread Setup------
 t1_stop = threading.Event()
@@ -106,16 +117,7 @@ t1.start()
 #main loop
 try:
         while True:
-                #print "Hello"
-
-                #tmpfeed = "Temperature"
-
-                #print "waiting to send\n"
-                #aio.send('Temperature', tmp)
-                #print "sending " + str(tmp) + " to Adafruit IO on feed " + tmpfeed + "\n"
-                #tmp += 1
-                #aio.send('Alerts', "TEST ALERT")
-                time.sleep(10)
+                time.sleep(1)
 except KeyboardInterrupt:	#exit on ctrl-c
         GPIO.cleanup()
         t1_stop.set()			#signal for thread to stop
