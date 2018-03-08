@@ -25,6 +25,7 @@ d_right = 19                    #Right Button
 select =  26                    #Select Button
 enter = 22                      #Enter Button
 
+y = 7
 essid = []
 Val = 0
 Size_Limit = 0
@@ -58,6 +59,7 @@ def Main_Menu():
         global Adafruit_Info
         global WIFI_PASSWORD
         global SSID_Info
+        global y
         Bool_Val = True
         while Bool_Val == True:
                 if GPIO.input(d_down) == False:
@@ -118,6 +120,7 @@ def Main_Menu():
 
         elif  Selected_Char == 3:
                 Selected_Char = 0
+                y = 7
                 Scan_Wifi()
                 
         elif Selected_Char == 4:
@@ -798,27 +801,38 @@ def Scan_Wifi():
         global SSID_Info
         global Val
         global essid
+        global y
+ 
         
         p1 = subprocess.Popen(["iwlist","wlan0","scan"],stdout=subprocess.PIPE)
         p2 = subprocess.Popen(["grep", "-oP", "SSID:\"\K[^\"]+"],stdin=p1.stdout,stdout=subprocess.PIPE)
-
         p1.stdout.close()
         out,err = p2.communicate()
-        #print(out)
         essid = out.splitlines()
-        #print(essid)
         essid = list(set(essid))
-        #print(essid)
-        #print(len(essid))
 
+        i = 0
         Val = len(essid)
+        Temp = Val
         draw.rectangle((0,0,width,height), outline=0, fill=0)
         text_enter1 = 'SELECT A WIFI SSID: '
         draw.text((0,0),text_enter1 + str(Selected_Char),font=font, fill=255)
-        if len(essid) > 0:
-                draw.text((0,7),essid[0],font=font,fill=255)
-                if len(essid) >1:
-                        draw.text((0,23),essid[1],font=font,fill=255)
+        while (Temp > -1):
+                draw.text((0,y),str(i) + ') ' +essid[i],font=font,fill=255)
+                y += 8
+                i += 1
+                Temp = Temp - 1
+                
+        if len(essid) < 1:
+                text_warn = "NO WIFI SSID"
+                text_warn2 = "TO DISPLAY"
+                draw.text((0,7),text_warn,font=font,fill=255)
+                draw.text((0,15),text_warn2,font=font,fill=255)
+                disp.image(image)
+                disp.display()
+                time.sleep(5)
+                Main_Menu()
+        
         disp.image(image)
         disp.display()
         Bool_Val = True
@@ -866,6 +880,7 @@ def Scan_Wifi():
         draw.rectangle((0,0,width,height), outline=0, fill=0)
         text_con = 'YOUR SELECTION IS'
         draw.text((0,0),text_con,font=font, fill=255)
+        draw.text((0,7),SSID_Info,font=font, fill=255)
         disp.image(image)
         disp.display()
         time.sleep(4)
@@ -873,17 +888,20 @@ def Scan_Wifi():
         
 def scan_disp():
         global essid
+        global y
         global Val
-        if Val < 4:
-        
-                draw.rectangle((0,0,width,height), outline=0, fill=0)
-                text_enter1 = 'SELECT A WIFI SSID: '
-                draw.text((0,0),text_enter1 + str(Selected_Char),font=font, fill=255)
-                draw.text((0,7),essid[0],font=font,fill=255)
-                draw.text((0,23),essid[1],font=font,fill=255)
-                disp.image(image)
-                disp.display()
-        
+
+        i = 0
+        Val = len(essid)
+        Temp = Val
+        draw.rectangle((0,0,width,height), outline=0, fill=0)
+        text_enter1 = 'SELECT A WIFI SSID: '
+        draw.text((0,0),text_enter1 + str(Selected_Char),font=font, fill=255)
+        while (Temp > -1):
+                draw.text((0,y),str(i) + ') ' + essid[i],font=font,fill=255)
+                y += 8
+                i += 1
+                Temp = Temp - 1
 
 def Disp_Inputs():
         global Adafruit_Info
