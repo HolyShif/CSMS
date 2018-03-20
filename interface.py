@@ -810,19 +810,12 @@ def Scan_Wifi():
         out,err = p2.communicate()
         essid = out.splitlines()
         essid = list(set(essid))
-
+        print (essid)
         i = 0
         Val = len(essid)
         Temp = Val
         draw.rectangle((0,0,width,height), outline=0, fill=0)
-        text_enter1 = 'SELECT A WIFI SSID: '
-        draw.text((0,0),text_enter1 + str(Selected_Char),font=font, fill=255)
-        while (Temp > -1):
-                draw.text((0,y),str(i) + ') ' +essid[i],font=font,fill=255)
-                y += 8
-                i += 1
-                Temp = Temp - 1
-                
+
         if len(essid) < 1:
                 text_warn = "NO WIFI SSID"
                 text_warn2 = "TO DISPLAY"
@@ -832,6 +825,18 @@ def Scan_Wifi():
                 disp.display()
                 time.sleep(5)
                 Main_Menu()
+
+        draw.rectangle((0,0,width,height), outline=0, fill=0)
+
+        text_enter1 = 'SELECT A WIFI SSID: '
+        draw.text((0,0),text_enter1 + str(Selected_Char),font=font, fill=255)
+        while (Temp > 0):
+                draw.text((0,y),str(i) + ") " + essid[i],font=font,fill=255)
+                y += 8
+                i += 1
+                Temp = Temp - 1
+                print(essid)
+        Choice = 0
         
         disp.image(image)
         disp.display()
@@ -841,7 +846,7 @@ def Scan_Wifi():
                 if GPIO.input(d_down) == False:
                         time.sleep(.1)
                         Selected_Char += 1
-                        if Selected_Char > Val:
+                        if Selected_Char == Val:
                                 Selected_Char = 0
                         scan_disp()
                         
@@ -849,20 +854,20 @@ def Scan_Wifi():
                         time.sleep(.1)
                         Selected_Char -= 1
                         if Selected_Char < 0:
-                                Selected_Char = Val
+                                Selected_Char = (Val-1)
                         scan_disp()
 
                 elif GPIO.input(d_left) == False:
                         time.sleep(.1)
                         Selected_Char -= 1
                         if Selected_Char < 0:
-                                Selected_Char = Val
+                                Selected_Char = (Val-1)
                         scan_disp()
 
                 elif GPIO.input(d_right) == False:
                         time.sleep(.1)
                         Selected_Char += 1
-                        if Selected_Char > Val:
+                        if Selected_Char == Val:
                                 Selected_Char = 0
                         scan_disp()
 
@@ -870,10 +875,16 @@ def Scan_Wifi():
                         time.sleep(.2)
                         Bool_Val = False
 
+                elif GPIO.input(back) == False:
+                        time.sleep(.2)
+                        Bool_Val = False
+                        Choice = 1
 
                 elif GPIO.input(enter) == False:
                         time.sleep(.2)
                         Bool_Val = False
+        if (Choice == 1):
+                Main_Menu()
 
         SSID_Info = essid[Selected_Char]
               
@@ -890,15 +901,16 @@ def scan_disp():
         global essid
         global y
         global Val
-
+        global Selected_Char
+        
         i = 0
         Val = len(essid)
         Temp = Val
         draw.rectangle((0,0,width,height), outline=0, fill=0)
         text_enter1 = 'SELECT A WIFI SSID: '
         draw.text((0,0),text_enter1 + str(Selected_Char),font=font, fill=255)
-        while (Temp > -1):
-                draw.text((0,y),str(i) + ') ' + essid[i],font=font,fill=255)
+        while (Temp > 0):
+                draw.text((0,y),str(i) + ") " + essid[i],font=font,fill=255)
                 y += 8
                 i += 1
                 Temp = Temp - 1

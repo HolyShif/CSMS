@@ -9,6 +9,6 @@ out,err = p2.communicate()
 essid = out.splitlines()
 #print(essid)
 essid = list(set(essid))
-#print(essid)
+print(essid)
 #print(len(essid))
 #sudo iwlist wlan0 scan | grep -oP 'SSID:"\K[^"]+'
