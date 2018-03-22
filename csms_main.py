@@ -46,7 +46,7 @@ GPIO.setup(led_temp_stat,GPIO.OUT)
 
 #------Adafruit IO Setup------
 aio = Client('afe0b443290e43eaa49f6f7b55841bed')        #adafruit io key
-
+print "past client"
 
 #------Variables------
 sensor = Adafruit_DHT.DHT22
@@ -61,19 +61,22 @@ def get_temp_humid(arg1, stop_event):      	#function for reading the DHT22, to 
 						#thread to continuously run without interference
         #aio = Client('afe0b443290e43eaa49f6f7b55841bed')        #adafruit io key
         #sensor = Adafruit_DHT.DHT22
+        print "in thread"
         GPIO.setup(temp_humid,GPIO.IN)
+        print "past gpio setup in thread"
         #temperature = 0
         #humidity = 0
         thresh_up = 0		#degrees celsius
         above_thresh = 0
         while(not stop_event.is_set()):
+                print "waiting for temp"
                 humidity, temperature = Adafruit_DHT.read_retry(sensor,temp_humid)
                 #print "Humidity = " + str(humidity) + " ::: Temperature = " + str(temperature) + "\n"
                 print temperature
 
                 if temperature > thresh_up:
                         above_thresh = 1
-                        alert_str = "Temperature Is Above " + str(temperature) + " Degrees Celsius\n"
+                        alert_str = "Temperature Is Above Threshold of " +str(thresh_up)+ " at " + str(temperature) + " Degrees Celsius\n"
                         aio.send('Alerts', alert_str)
                         print "sent alert to Alerts feed for out of spec temperature\n"
                 else:

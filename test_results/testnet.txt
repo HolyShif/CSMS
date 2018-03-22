@@ -1,0 +1,29 @@
+FFF...
+======================================================================
+FAIL: test_adafruitio (__main__.TestNetOff)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "test_net.py", line 20, in test_adafruitio
+    self.assertFalse(inet_check.check_connection("www.adafruit.io"))
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_google (__main__.TestNetOff)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "test_net.py", line 16, in test_google
+    self.assertFalse(inet_check.check_connection("www.google.com"))
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_yahoo (__main__.TestNetOff)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "test_net.py", line 18, in test_yahoo
+    self.assertFalse(inet_check.check_connection("www.yahoo.com"))
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 6 tests in 5.250s
+
+FAILED (failures=3)
