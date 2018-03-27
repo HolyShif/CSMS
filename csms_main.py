@@ -6,6 +6,9 @@ import time
 import threading
 from Adafruit_IO import Client       #adafruit io lib, current using REST not MQTT
 import Adafruit_DHT             #for DHT22
+import inet_check
+import Queue
+import subprocess
 
 GPIO.setmode(GPIO.BCM)        #board pin numbering, not Broadcom
 
@@ -55,6 +58,8 @@ sensor = Adafruit_DHT.DHT22
 #thresh_up = 0		#degrees celsius
 #above_thresh = 0
 #tmp = 0
+alert_queue = Queue.Queue(maxsize=100)
+data_queue = Queue.Queue(maxsize=720)
 
 #------Function Definitions------
 def get_temp_humid(arg1, stop_event):      	#function for reading the DHT22, to be put in
@@ -68,30 +73,136 @@ def get_temp_humid(arg1, stop_event):      	#function for reading the DHT22, to 
         #humidity = 0
         thresh_up = 0		#degrees celsius
         above_thresh = 0
+
+        #initial temp reading
+        humidity, temperature = Adafruit_DHT.read_retry(sensor,temp_humid)
+        
+        send_data(temperature,humidity,not GPIO.input(main_pow_on))
+        
+        st_time = time.time()
         while(not stop_event.is_set()):
-                print "waiting for temp"
-                humidity, temperature = Adafruit_DHT.read_retry(sensor,temp_humid)
-                #print "Humidity = " + str(humidity) + " ::: Temperature = " + str(temperature) + "\n"
-                print temperature
+                end_time = time.time()
+                #if ten minutes has passed
+                if(ten_min(st_time,end_time) == True):
+                        #print "time elapsed-----------------"
+                        humidity, temperature = Adafruit_DHT.read_retry(sensor,temp_humid)
+                        send_data(temperature,humidity,not GPIO.input(main_pow_on))
+                        
+                        if temperature > thresh_up:
+                                if above_thresh == 0:
+                                        send_alert("Temperature Has Raised Above Threshold\n")
+                                        above_thresh = 1
+                        else:
+                                if above_thresh == 1:
+                                        send_alert("Temperature Has Returned Below Threshold\n")
+                                        above_thresh = 0
+                                
+                        st_time = end_time      #reset time interval
 
-                if temperature > thresh_up:
-                        above_thresh = 1
-                        alert_str = "Temperature Is Above Threshold of " +str(thresh_up)+ " at " + str(temperature) + " Degrees Celsius\n"
-                        aio.send('Alerts', alert_str)
-                        print "sent alert to Alerts feed for out of spec temperature\n"
+
+                if not alert_queue.empty() and (inet_check.check_connection('www.adafruit.io') == True):
+                        aio.send('History',alert_queue.get())
+                        time.sleep(3)   #throttle output
                 else:
-                        above_thresh = 0
+                        pass
+                        #print "alert queue empty"
+                if not data_queue.empty() and (inet_check.check_connection('www.adafruit.io') == True):
+                        aio.send('History',data_queue.get())
+                        time.sleep(3)   #throttle output
+                else:
+                        pass
+                        #print "data_queue empty"
+                        
+                #print "waiting for temp"
+                #humidity, temperature = Adafruit_DHT.read_retry(sensor,temp_humid)
+                #print "Humidity = " + str(humidity) + " ::: Temperature = " + str(temperature) + "\n"
+                #print temperature
 
-                aio.send('Temperature', temperature)
-                print "Sent " + str(temperature) + " To Adafruit IO On Feed Temperature\n"
+                #if temperature > thresh_up:
+                        #above_thresh = 1
+                        #alert_str = "Temperature Is Above Threshold of " +str(thresh_up)+ " at " + str(temperature) + " Degrees Celsius\n"
+                        #send_alert("Temp At " + str(temperature) + " Is Above Threshold\n")
+                        #print "sent alert to Alerts feed for out of spec temperature\n"
+                #else:
+                        #above_thresh = 0
+
+                #aio.send('Temperature', temperature)
+                #print "Sent " + str(temperature) + " To Adafruit IO On Feed Temperature\n"
+                #send_data(temperature,humidity,not GPIO.input(main_pow_on))
 
                 #stop_event.wait(600)		#repeat every 10 minutes
-                stop_event.wait(10)
+                #stop_event.wait(10)
+def ten_min(start,end):
+        elapsed_sec = end-start
+        #return True if 10 or more minutes have passed
+        #return elapsed_sec >= 10*60
+        return elapsed_sec >= 5
+def send_alert(string):
+        global alert_queue
+        alert_str = time.strftime("%m/%d/%Y %H:%M:%S ") + string
+
+        if(inet_check.check_connection('www.adafruit.io') == True):
+                aio.send('Alerts', alert_str)
+                print "Sent Alert"
+        else:
+                alert_queue.put(alert_str)
+                print "pushed alert onto queue"
+        return
+
+def send_data(temp,humid,bat_on):
+        global data_queue
+        if(inet_check.check_connection('www.adafruit.io') == True):
+                aio.send('Temperature', temp)
+                aio.send('Humidity', humid)
+                print "Sent Data"
+        else:
+                data_str = time.strftime("%m/%d/%Y %H:%M:%S") +" Temp=" + str(temp) + " Humid=" + str(humid) + " Bat_Active=" +str(bat_on)+'\n'
+                data_queue.put(data_str)
+                print "**BAT_ON =" + str(bat_on) + "**"
+                print "pushed data onto queue"
+        return
 
 #1st priority interrupt
 def low_battery(channel):
-	print "Low Battery Triggered\n"
-	return
+        print "Low Battery Triggered\n"
+        global alert_queue
+        global data_queue
+        GPIO.cleanup()
+        t1_stop.set()			#signal for thread to stop
+
+        shut_str = "System Shutdown Due to Low Battery\n"
+        send_alert(shut_str)
+
+        #write alert queue to file
+        f = open('aqueue.txt','w')
+        if alert_queue.empty() == True:
+                f.close()
+        else:
+                while(not alert_queue.empty()):
+                        a = alert_queue.get()
+                        print a
+                        f.write(a)
+                f.close()
+
+        #write data queue to file
+        f = open('dqueue.txt','w')
+        if data_queue.empty() == True:
+                f.close()
+        else:
+                while(not data_queue.empty()):
+                        d = data_queue.get()
+                        print a
+                        f.write(d)
+                f.close()
+
+
+        #
+        #
+        #send shutdown command
+        #subprocess.call(['sudo', 'shutdown', '-h', 'now'])
+        #we want this thing to completely die, otherwise we cant wake it up?
+        #
+        return
 
 def bat_on(channel):
         print "Battery Activated"
@@ -119,8 +230,31 @@ t1.start()
 
 #main loop
 try:
+        #read in past alert queue from file
+        f = open('aqueue.txt','r')
+        for line in f:
+                print line
+                alert_queue.put(line)
+
+        f.close()
+
+        #read in past data queue from file
+        f = open('dqueue.txt','r')
+        for line in f:
+                print line
+                data_queue.put(line)
+
+        f.close()
+
         while True:
                 time.sleep(1)
+                #
+                #
+                #CALL BRIANS MENU STUFF
+                #
+                #
+                
+                
 except KeyboardInterrupt:	#exit on ctrl-c
         GPIO.cleanup()
         t1_stop.set()			#signal for thread to stop
