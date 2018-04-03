@@ -78,7 +78,10 @@ def get_temp_humid(arg1, stop_event):      	#function for reading the DHT22, to 
         humidity, temperature = Adafruit_DHT.read_retry(sensor,temp_humid)
         
         send_data(temperature,humidity,not GPIO.input(main_pow_on))
-        
+        #****add threshold logic here****
+
+
+        #loop temp readings and aio sends
         st_time = time.time()
         while(not stop_event.is_set()):
                 end_time = time.time()

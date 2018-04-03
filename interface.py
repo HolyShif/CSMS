@@ -8,7 +8,7 @@ from PIL import ImageDraw
 from PIL import ImageFont
 import subprocess
 #-----------------Variables---------------------------
-RST = None
+RST = 4
 disp = Adafruit_SSD1306.SSD1306_128_64(rst=RST, i2c_address=0x3D)
 #List of Character for passwords or email input
 Selected_Character  = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U"]
@@ -810,7 +810,7 @@ def Scan_Wifi():
         out,err = p2.communicate()
         essid = out.splitlines()
         essid = list(set(essid))
-        print (essid)
+        #print (essid)
         i = 0
         Val = len(essid)
         Temp = Val
@@ -835,7 +835,6 @@ def Scan_Wifi():
                 y += 8
                 i += 1
                 Temp = Temp - 1
-                print(essid)
         Choice = 0
         
         disp.image(image)
@@ -844,28 +843,28 @@ def Scan_Wifi():
         
         while Bool_Val == True:
                 if GPIO.input(d_down) == False:
-                        time.sleep(.1)
+                        time.sleep(.2)
                         Selected_Char += 1
                         if Selected_Char == Val:
                                 Selected_Char = 0
                         scan_disp()
                         
                 elif GPIO.input(d_up) == False:
-                        time.sleep(.1)
+                        time.sleep(.2)
                         Selected_Char -= 1
                         if Selected_Char < 0:
                                 Selected_Char = (Val-1)
                         scan_disp()
 
                 elif GPIO.input(d_left) == False:
-                        time.sleep(.1)
+                        time.sleep(.2)
                         Selected_Char -= 1
                         if Selected_Char < 0:
                                 Selected_Char = (Val-1)
                         scan_disp()
 
                 elif GPIO.input(d_right) == False:
-                        time.sleep(.1)
+                        time.sleep(.2)
                         Selected_Char += 1
                         if Selected_Char == Val:
                                 Selected_Char = 0
@@ -886,15 +885,15 @@ def Scan_Wifi():
         if (Choice == 1):
                 Main_Menu()
 
-        SSID_Info = essid[Selected_Char]
-              
+        SSID_Info = essid[Selected_Char]     
         draw.rectangle((0,0,width,height), outline=0, fill=0)
         text_con = 'YOUR SELECTION IS'
         draw.text((0,0),text_con,font=font, fill=255)
         draw.text((0,7),SSID_Info,font=font, fill=255)
         disp.image(image)
         disp.display()
-        time.sleep(4)
+        time.sleep(2)
+        Selected_Char = 0
         Main_Menu()
         
 def scan_disp():
@@ -904,6 +903,7 @@ def scan_disp():
         global Selected_Char
         
         i = 0
+        y = 7
         Val = len(essid)
         Temp = Val
         draw.rectangle((0,0,width,height), outline=0, fill=0)
@@ -914,6 +914,9 @@ def scan_disp():
                 y += 8
                 i += 1
                 Temp = Temp - 1
+        disp.image(image)
+        disp.display()
+        
 
 def Disp_Inputs():
         global Adafruit_Info
