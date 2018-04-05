@@ -9,43 +9,42 @@ import Adafruit_DHT             #for DHT22
 import inet_check
 import Queue
 import subprocess
+import interface
 
-GPIO.setmode(GPIO.BCM)        #board pin numbering, not Broadcom
+GPIO.setmode(GPIO.BCM)
 
 #------Pin Definitions------
-oled_rtc_i2c_data = 2           #i2c sda data bus for oled and rtc
-oled_rtc_i2c_clk = 3            #i2c sdc clock bus for oled and rtc
-oled_reset = 4                  #reset for oled
+#oled_rtc_i2c_data = 2           #i2c sda data bus for oled and rtc
+#oled_rtc_i2c_clk = 3            #i2c sdc clock bus for oled and rtc
+#oled_reset = 4                  #reset for oled
 temp_humid = 18                 #DHT22 temp/humidity sensor
 pow_on_rise = 23                #main power indicator
 pow_off_fall = 25
 low_bat = 17                    #low battery indicator
-d_up = 5                        #direction pad up
-d_down = 6                      #direction pad down
-back = 12                       #back button
-d_left = 13                     #direction pad left
-d_right = 19                    #direction pad right
+#d_up = 5                        #direction pad up
+#d_down = 6                      #direction pad down
+#back = 12                       #back button
+#d_left = 13                     #direction pad left
+#d_right = 19                    #direction pad right
 led_pwr = 16                    #power indicator led
-select = 26                     #select button
+#select = 26                     #select button
 led_inet = 20                   #internet indicator led
 led_temp_stat = 21              #good temperature indicator led
 
 #------Pin Setup------
 
-#**do i2c setup**
-
-GPIO.setup(oled_reset,GPIO.OUT)
+#GPIO.setup(oled_reset,GPIO.OUT)
 GPIO.setup(temp_humid,GPIO.IN)
 GPIO.setup(pow_on_rise,GPIO.IN)
 GPIO.setup(pow_off_fall,GPIO.IN)
 GPIO.setup(low_bat,GPIO.IN)
-GPIO.setup(d_up,GPIO.IN)
-GPIO.setup(d_down,GPIO.IN)
-GPIO.setup(back,GPIO.IN)
-GPIO.setup(d_left,GPIO.IN)
-GPIO.setup(d_right,GPIO.IN)
+#GPIO.setup(d_up,GPIO.IN)
+#GPIO.setup(d_down,GPIO.IN)
+#GPIO.setup(back,GPIO.IN)
+#GPIO.setup(d_left,GPIO.IN)
+#GPIO.setup(d_right,GPIO.IN)
 GPIO.setup(led_pwr,GPIO.OUT)
-GPIO.setup(select,GPIO.IN)
+#GPIO.setup(select,GPIO.IN)
 GPIO.setup(led_inet,GPIO.OUT)
 GPIO.setup(led_temp_stat,GPIO.OUT)
 
@@ -63,6 +62,18 @@ sensor = Adafruit_DHT.DHT22
 alert_queue = Queue.Queue(maxsize=100)
 data_queue = Queue.Queue(maxsize=720)
 
+#initial power led
+if(GPIO.input(pow_on_rise) == True):
+        GPIO.output(led_pwr, GPIO.HIGH)
+else:
+        GPIO.output(led_pwr, GPIO.LOW)
+
+#initial temp led
+GPIO.output(led_temp_stat,GPIO.HIGH)
+#initial inet led
+GPIO.output(led_inet,GPIO.HIGH)
+
+
 #------Function Definitions------
 def get_temp_humid(arg1, stop_event):      	#function for reading the DHT22, to be put in
 						#thread to continuously run without interference
@@ -73,7 +84,7 @@ def get_temp_humid(arg1, stop_event):      	#function for reading the DHT22, to 
         print "past gpio setup in thread"
         #temperature = 0
         #humidity = 0
-        thresh_up = 0		#degrees celsius
+        thresh_up = 26		#degrees celsius
         above_thresh = 0
 
         #initial temp reading
@@ -92,15 +103,17 @@ def get_temp_humid(arg1, stop_event):      	#function for reading the DHT22, to 
                         #print "time elapsed-----------------"
                         humidity, temperature = Adafruit_DHT.read_retry(sensor,temp_humid)
                         send_data(temperature,humidity,not GPIO.input(pow_on_rise))
-                        
+                        print temperature
                         if temperature > thresh_up:
                                 if above_thresh == 0:
                                         send_alert("Temperature Has Raised Above Threshold\n")
                                         above_thresh = 1
+                                        GPIO.output(led_temp_stat,GPIO.LOW)
                         else:
                                 if above_thresh == 1:
                                         send_alert("Temperature Has Returned Below Threshold\n")
                                         above_thresh = 0
+                                        GPIO.output(led_temp_stat,GPIO.HIGH)
                                 
                         st_time = end_time      #reset time interval
 
@@ -149,9 +162,11 @@ def send_alert(string):
         if(inet_check.check_connection('www.adafruit.io') == True):
                 aio.send('Alerts', alert_str)
                 print "Sent Alert"
+                GPIO.output(led_inet,GPIO.HIGH)
         else:
                 alert_queue.put(alert_str)
                 print "pushed alert onto queue"
+                GPIO.output(led_inet,GPIO.LOW)
         return
 
 def send_data(temp,humid,bat_on):
@@ -160,11 +175,13 @@ def send_data(temp,humid,bat_on):
                 aio.send('Temperature', temp)
                 aio.send('Humidity', humid)
                 print "Sent Data"
+                GPIO.output(led_inet,GPIO.HIGH)
         else:
                 data_str = time.strftime("%m/%d/%Y %H:%M:%S") +" Temp=" + str(temp) + " Humid=" + str(humid) + " Bat_Active=" +str(bat_on)+'\n'
                 data_queue.put(data_str)
                 print "**BAT_ON =" + str(bat_on) + "**"
                 print "pushed data onto queue"
+                GPIO.output(led_inet,GPIO.LOW)
         return
 
 #1st priority interrupt
@@ -220,6 +237,7 @@ def bat_on(channel):
         astr = "Battery Activated\n"
         send_alert(astr)
         print astr
+        GPIO.output(led_pwr, GPIO.LOW)
         return
 
 def mains_on(channel):
@@ -229,6 +247,7 @@ def mains_on(channel):
         astr = "Main Power Restored\n"
         send_alert(astr)
         print astr
+        GPIO.output(led_pwr, GPIO.HIGH)
         return
 
 #------Interrupt Callback Setup------
@@ -267,13 +286,13 @@ try:
         f.close()
 
         while True:
-                time.sleep(1)
+                #time.sleep(1)
                 #
                 #
                 #CALL BRIANS MENU STUFF
                 #
                 #
-                
+                interface.Main_Menu()
                 
 except KeyboardInterrupt:	#exit on ctrl-c
         GPIO.cleanup()

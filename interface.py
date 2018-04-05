@@ -16,7 +16,7 @@ Selected_Character  = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","
 Selected_Character += ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","i","o","q","r","s","t","u"]
 Selected_Character += ["V","W","X","Y","Z","1","2","3","4","5","6","7","8","9","0","_",".","/"]
 Selected_Character += ["v","w","x","y","z","!","@","#","$","%","^","&","*","(",")","\\","<",">"]
-
+GPIO.setmode(GPIO.BCM)
 #All Buttons Use BCM
 d_up = 5                        #Up button
 d_down = 6                      #Down Button
@@ -1021,4 +1021,4 @@ def Disp_Inputs():
                         Bool_Val = False
         Main_Menu()
         
-Main_Menu()
+#Main_Menu()
