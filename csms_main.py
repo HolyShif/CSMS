@@ -17,7 +17,8 @@ oled_rtc_i2c_data = 2           #i2c sda data bus for oled and rtc
 oled_rtc_i2c_clk = 3            #i2c sdc clock bus for oled and rtc
 oled_reset = 4                  #reset for oled
 temp_humid = 18                 #DHT22 temp/humidity sensor
-main_pow_on = 23                #main power indicator
+pow_on_rise = 23                #main power indicator
+pow_off_fall = 25
 low_bat = 17                    #low battery indicator
 d_up = 5                        #direction pad up
 d_down = 6                      #direction pad down
@@ -35,7 +36,8 @@ led_temp_stat = 21              #good temperature indicator led
 
 GPIO.setup(oled_reset,GPIO.OUT)
 GPIO.setup(temp_humid,GPIO.IN)
-GPIO.setup(main_pow_on,GPIO.IN)
+GPIO.setup(pow_on_rise,GPIO.IN)
+GPIO.setup(pow_off_fall,GPIO.IN)
 GPIO.setup(low_bat,GPIO.IN)
 GPIO.setup(d_up,GPIO.IN)
 GPIO.setup(d_down,GPIO.IN)
@@ -77,7 +79,7 @@ def get_temp_humid(arg1, stop_event):      	#function for reading the DHT22, to 
         #initial temp reading
         humidity, temperature = Adafruit_DHT.read_retry(sensor,temp_humid)
         
-        send_data(temperature,humidity,not GPIO.input(main_pow_on))
+        send_data(temperature,humidity,not GPIO.input(pow_on_rise))
         #****add threshold logic here****
 
 
@@ -89,7 +91,7 @@ def get_temp_humid(arg1, stop_event):      	#function for reading the DHT22, to 
                 if(ten_min(st_time,end_time) == True):
                         #print "time elapsed-----------------"
                         humidity, temperature = Adafruit_DHT.read_retry(sensor,temp_humid)
-                        send_data(temperature,humidity,not GPIO.input(main_pow_on))
+                        send_data(temperature,humidity,not GPIO.input(pow_on_rise))
                         
                         if temperature > thresh_up:
                                 if above_thresh == 0:
@@ -167,6 +169,10 @@ def send_data(temp,humid,bat_on):
 
 #1st priority interrupt
 def low_battery(channel):
+        time.sleep(3)
+        if GPIO.input(low_bat) == True:
+                return
+        
         print "Low Battery Triggered\n"
         global alert_queue
         global data_queue
@@ -208,18 +214,29 @@ def low_battery(channel):
         return
 
 def bat_on(channel):
-        print "Battery Activated"
+        time.sleep(3)
+        if GPIO.input(pow_off_fall) == True:
+                return
+        astr = "Battery Activated\n"
+        send_alert(astr)
+        print astr
         return
 
 def mains_on(channel):
-        print "Main Power Restored"
+        time.sleep(3)
+        if GPIO.input(pow_on_rise) == False:
+                return
+        astr = "Main Power Restored\n"
+        send_alert(astr)
+        print astr
         return
 
 #------Interrupt Callback Setup------
 #low battery
 GPIO.add_event_detect(low_bat, GPIO.FALLING, callback=low_battery, bouncetime=300)
 #battery activation
-GPIO.add_event_detect(main_pow_on, GPIO.FALLING, callback=bat_on, bouncetime=300)
+GPIO.add_event_detect(pow_on_rise, GPIO.RISING, callback=mains_on, bouncetime=10000)
+GPIO.add_event_detect(pow_off_fall, GPIO.FALLING, callback=bat_on, bouncetime=10000)
 #main power restoration
 #GPIO.add_event_detect(main_pow_on, GPIO.RISING, callback=mains_on, bouncetime=300)
 

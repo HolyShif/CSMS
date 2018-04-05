@@ -7,6 +7,7 @@ from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 import subprocess
+import wifi
 #-----------------Variables---------------------------
 RST = 4
 disp = Adafruit_SSD1306.SSD1306_128_64(rst=RST, i2c_address=0x3D)
